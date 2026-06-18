@@ -198,7 +198,7 @@
           </div>
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-1.5">目前職稱</label>
-            <input type="text" id="user-title" placeholder="如：系統分析師、技士、約聘人員、高級程序員" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+            <input type="text" id="user-title" placeholder="如：技士、資料管理師、系統分析師/工程員、行政幹事、程式設計員、專任助理" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
           </div>
           <div>
             <label class="block text-sm font-semibold text-slate-700 mb-1.5">主要職能 (對應 AI 角色指標)</label>
@@ -206,7 +206,7 @@
               <option value="">-- 請選擇您最貼近的職能職稱 --</option>
               <option value="專案管理">專案管理 (Project Management)</option>
               <option value="行政管理">行政管理 (Administration)</option>
-              <option value="IT與網管維運">IT / 網管維運 / 開發 (IT & Network)</option>
+              <option value="IT與網管維運">IT / 軟體開發 / 網管維運  /系統分析 (IT & Network & SA)</option>
               <option value="媒體行銷">媒體行銷與設計 (Marketing & Design)</option>
               <option value="技術顧問與推廣">顧問服務與科技推廣 (Consulting & Support)</option>
               <option value="財務會計與採購">財務會計與採購審核 (Finance & Procurement)</option>
@@ -214,11 +214,7 @@
           </div>
         </div>
 
-        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg mt-4 text-xs text-yellow-800 leading-relaxed">
-          <span class="font-bold">⚠️ 國立臺灣師範大學 M365 合規提醒：</span><br>
-          依據本校 M365 教育版服務使用規範，在導入及使用生成式 AI（如 Microsoft Copilot）處理公務前，使用者應避免將公務機密或包含個資等敏感性資料上傳至任何公開 AI 工具。
-        </div>
-      </div>
+
 
       <!-- STEP 2: 常用 AI 工具 -->
       <div id="step-2" class="step-panel hidden space-y-6">
@@ -339,14 +335,14 @@
             </div>
             <div class="text-left md:text-right text-xs text-slate-500">
               <p>評估日期：<span id="report-date" class="font-mono">--</span></p>
-              <p>安全性：<span class="text-emerald-600 font-semibold">本機沙盒核發 (不落伺服器)</span></p>
+              <p>安全性：<span class="text-emerald-600 font-semibold">本機核發 (不落伺服器)</span></p>
             </div>
           </div>
 
           <!-- Section A: Metadata -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
             <div>
-              <p class="text-slate-400">同仁姓名 / 代碼</p>
+              <p class="text-slate-400">同仁姓名</p>
               <p id="rep-name" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
             </div>
             <div>
@@ -354,7 +350,7 @@
               <p id="rep-dept" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
             </div>
             <div>
-              <p class="text-slate-400">職等職稱</p>
+              <p class="text-slate-400">職稱</p>
               <p id="rep-title" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
             </div>
             <div>
@@ -579,9 +575,9 @@
       { id: "q9", text: "我深刻了解不同 AI 技術與模型的適用情境，且在構思解決方案時，能全面考量其可行性、成本效益及使用者體驗。", dimension: "integration", label: "AI應用與場景整合" },
 
       // Dimension 4: 數據識讀與治理 (Data Literacy & Governance)
-      { id: "q10", text: "在將資料輸入 AI 工具前，我會進行篩選、清洗與「去識別化」（如模糊化同仁或學生個資、隱去機密系統 IP），以確保不外洩機敏資訊。", dimension: "governance", label: "數據識讀與治理" },
+      { id: "q10", text: "在將資料輸入 AI 工具前，我會進行篩選、清洗與「去識別化」（如模糊化同仁或學生個資、隱去機密系統 IP），以確保不外洩機敏資訊。使用臺師大 GWS (GEMINI)/ M365 (COPILET CHAT)。 ", dimension: "governance", label: "數據識讀與治理" },
       { id: "q11", text: "我能敏銳辨識 AI 產出內容的潛在偏誤、幻覺（不實言論），並在採用其論點或數據前進行多重查核以確保其真實性。", dimension: "governance", label: "數據識讀與治理" },
-      { id: "q12", text: "我能確保本人或團隊產出的 AI 結果完全符合資訊安全法規、道德標準、智慧財產權，及臺師大 M365 服務之合規使用規範。", dimension: "governance", label: "數據識讀與治理" }
+      { id: "q12", text: "我能確保本人產出的 AI 結果完全符合資訊安全法規、道德標準、智慧財產權等之合規使用規範。", dimension: "governance", label: "數據識讀與治理" }
     ];
 
     // Collaboration & Leadership
