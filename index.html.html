@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>臺師大資訊中心 - 個人 AI 能力評估系統</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for beautiful analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ntnu: {
+              maroon: '#7B1824', // 師大紅
+              gold: '#D4AF37',   // 師大金
+              dark: '#1e1b1b',
+              gray: '#f5f4f2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Printing Layout Styling */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-card {
+        border: none !important;
+        box-shadow: none !important;
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+    
+    /* Scroll styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans selection:bg-ntnu-maroon selection:text-white">
+
+  <!-- TOP HEADER (No Print) -->
+  <header class="bg-ntnu-maroon text-white shadow-md no-print sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <!-- Logo / Emblem Placeholder using SVG -->
+        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-ntnu-maroon font-bold text-lg border-2 border-ntnu-gold shadow-inner">
+          師
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
+            國立臺灣師範大學資訊中心
+          </h1>
+          <p class="text-xs text-slate-200 uppercase tracking-widest">Personal AI Capability Assessment System</p>
+        </div>
+      </div>
+      
+      <!-- Privacy Strategy Controller (離線安全控制中心) -->
+      <div class="bg-black/20 p-2 rounded-lg border border-white/10 text-xs flex flex-wrap items-center gap-3">
+        <span class="font-medium text-ntnu-gold flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          本機隱私保護模式:
+        </span>
+        <div class="flex bg-slate-800/80 p-0.5 rounded border border-slate-700">
+          <button id="store-none" onclick="setStorageMode('none')" class="px-2.5 py-1 rounded text-[11px] transition-all font-semibold bg-ntnu-maroon text-white shadow">
+            不留作答(安全)
+          </button>
+          <button id="store-session" onclick="setStorageMode('session')" class="px-2.5 py-1 rounded text-[11px] transition-all text-slate-300 hover:text-white">
+            Reload保留
+          </button>
+          <button id="store-local" onclick="setStorageMode('local')" class="px-2.5 py-1 rounded text-[11px] transition-all text-slate-300 hover:text-white">
+            長期儲存
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SUB BANNER (No Print) -->
+  <div class="bg-gradient-to-r from-ntnu-maroon to-rose-950 text-white py-10 px-4 shadow-inner no-print">
+    <div class="max-w-5xl mx-auto text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6">
+      <div>
+        <span class="bg-ntnu-gold/20 text-ntnu-gold text-xs font-semibold px-3 py-1 rounded-full border border-ntnu-gold/30">
+          融合《資訊中心10大核心項目》與《AI人才認定指引》
+        </span>
+        <h2 class="text-3xl font-extrabold mt-3 tracking-tight">個人 AI 即戰力與實務成熟度評測</h2>
+        <p class="text-slate-300 mt-2 text-sm max-w-2xl leading-relaxed">
+          歡迎使用本評估系統。本系統採用<strong class="text-white">純前端安全沙盒架構</strong>，所有作答資訊均不會上傳至伺服器，安全守護您的私隱。評估結果將助您釐清行政工作 AI 化的定位、熟練度，並可產出專業能力雷達報告供個人留存。
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="exportData()" class="px-4 py-2 border border-slate-300 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+          備份作答JSON
+        </button>
+        <button onclick="triggerImport()" class="px-4 py-2 border border-slate-300 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          匯入備份
+        </button>
+        <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="flex-grow max-w-5xl w-full mx-auto p-4 md:py-8 flex flex-col gap-6">
+    
+    <!-- STEP PROGRESS INDICATOR (No Print) -->
+    <nav class="no-print bg-white rounded-xl shadow-sm border border-slate-200/80 p-4">
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-2">
+        <span>作答進度</span>
+        <span id="progress-percent">0%</span>
+      </div>
+      <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+        <div id="progress-bar" class="bg-gradient-to-r from-ntnu-maroon to-ntnu-gold h-full transition-all duration-300" style="width: 16.6%"></div>
+      </div>
+      
+      <!-- Stepper Buttons -->
+      <div class="grid grid-cols-6 gap-1 mt-4 text-center">
+        <button onclick="goToStep(1)" id="step-btn-1" class="py-2 px-1 text-xs font-bold rounded-lg border-b-4 transition-all border-ntnu-maroon text-ntnu-maroon bg-slate-50">
+          1. 基本資料
+        </button>
+        <button onclick="goToStep(2)" id="step-btn-2" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50">
+          2. 常用 AI
+        </button>
+        <button onclick="goToStep(3)" id="step-btn-3" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50">
+          3. 核心公務
+        </button>
+        <button onclick="goToStep(4)" id="step-btn-4" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50">
+          4. 實務自評
+        </button>
+        <button onclick="goToStep(5)" id="step-btn-5" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50">
+          5. 協作領導
+        </button>
+        <button onclick="goToStep(6)" id="step-btn-6" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50">
+          6. 評估報告
+        </button>
+      </div>
+    </nav>
+
+    <!-- CONTENT BOX -->
+    <div class="bg-white rounded-xl shadow-md border border-slate-200/80 p-6 min-h-[450px] flex flex-col justify-between print-card">
+      
+      <!-- STEP 1: 基本資料 -->
+      <div id="step-1" class="step-panel space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900 border-l-4 border-ntnu-maroon pl-3 flex items-center gap-2">
+            第一階段：同仁基本資料填寫
+          </h3>
+          <p class="text-xs text-slate-500 mt-1 pl-4">請先填寫您的基本公務屬性，這將用作能力定位的權重分析基礎。</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">姓名 / 同仁代碼</label>
+            <input type="text" id="user-name" placeholder="請輸入姓名或英文簡稱" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">所屬組別 / 單位</label>
+            <select id="user-dept" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+              <option value="">-- 請選擇組別 --</option>
+              <option value="主任室">主任室</option>
+              <option value="行政支援組">行政支援組</option>
+              <option value="網路系統組">網路系統組</option>
+              <option value="教學服務組">教學服務組</option>
+              <option value="科技推廣組">科技推廣組</option>
+              <option value="校內其他處室支援同仁">校內其他處室支援同仁</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">目前職稱</label>
+            <input type="text" id="user-title" placeholder="如：系統分析師、技士、約聘人員、高級程序員" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">主要職能 (對應 AI 角色指標)</label>
+            <select id="user-role" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+              <option value="">-- 請選擇您最貼近的職能職稱 --</option>
+              <option value="專案管理">專案管理 (Project Management)</option>
+              <option value="行政管理">行政管理 (Administration)</option>
+              <option value="IT與網管維運">IT / 網管維運 / 開發 (IT & Network)</option>
+              <option value="媒體行銷">媒體行銷與設計 (Marketing & Design)</option>
+              <option value="技術顧問與推廣">顧問服務與科技推廣 (Consulting & Support)</option>
+              <option value="財務會計與採購">財務會計與採購審核 (Finance & Procurement)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg mt-4 text-xs text-yellow-800 leading-relaxed">
+          <span class="font-bold">⚠️ 國立臺灣師範大學 M365 合規提醒：</span><br>
+          依據本校 M365 教育版服務使用規範，在導入及使用生成式 AI（如 Microsoft Copilot）處理公務前，使用者應避免將公務機密或包含個資等敏感性資料上傳至任何公開 AI 工具。
+        </div>
+      </div>
+
+      <!-- STEP 2: 常用 AI 工具 -->
+      <div id="step-2" class="step-panel hidden space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900 border-l-4 border-ntnu-maroon pl-3">
+            第二階段：目前常用 AI 工具勾選
+          </h3>
+          <p class="text-xs text-slate-500 mt-1 pl-4">請選出您日常工作或私底下曾使用、較常運用的 AI 工具（可多選），並分享您的工作流。</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-3">1. 常用 AI 工具清單 (多選)</label>
+          <div id="tools-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <!-- Dynamic checkboxes generated by JavaScript -->
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <label class="block text-sm font-semibold text-slate-700">2. 工作實務應用描述 (請任選您勾選中的 3 項工具，具體說明您如何使用在工作中)</label>
+          <div class="space-y-3 text-sm">
+            <div>
+              <span class="font-medium text-xs text-ntnu-maroon block mb-1">應用案例 1：</span>
+              <textarea id="app-case-1" rows="2" placeholder="例：使用 Microsoft Copilot 協助潤飾中心內部行政公文與會議記錄，並進行拼字與排版確認。" class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-ntnu-maroon text-xs"></textarea>
+            </div>
+            <div>
+              <span class="font-medium text-xs text-ntnu-maroon block mb-1">應用案例 2：</span>
+              <textarea id="app-case-2" rows="2" placeholder="例：利用 ChatGPT 將零散程式 log 自動分類並提供初步異常偵錯與資安警告修正建議。" class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-ntnu-maroon text-xs"></textarea>
+            </div>
+            <div>
+              <span class="font-medium text-xs text-ntnu-maroon block mb-1">應用案例 3：</span>
+              <textarea id="app-case-3" rows="2" placeholder="例：運用 Notta / Whisper 進行會議錄音並快速生成中心組長會議之逐字稿初稿。" class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-ntnu-maroon text-xs"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: 核心公務選取 -->
+      <div id="step-3" class="step-panel hidden space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900 border-l-4 border-ntnu-maroon pl-3">
+            第三階段：臺師大資訊中心 10 大核心工作項目選取
+          </h3>
+          <p class="text-xs text-slate-500 mt-1 pl-4">請勾選您在中心內主要負責或協同參與的核心工作項目（至少選擇一項，將與後續 AI 即戰力報告連結）：</p>
+        </div>
+
+        <div id="core-tasks-list" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-2">
+          <!-- Populated by Javascript -->
+        </div>
+
+        <div class="text-xs text-slate-500 italic">
+          * 選取您的核心業務後，在第四階段的自評中，請著重評估您如何「引導 AI 提升或優化這些項目」的運作效率。
+        </div>
+      </div>
+
+      <!-- STEP 4: 實務能力自評 -->
+      <div id="step-4" class="step-panel hidden space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900 border-l-4 border-ntnu-maroon pl-3">
+            第四階段：行政與實務操作成熟度自評
+          </h3>
+          <p class="text-xs text-slate-500 mt-1 pl-4">依據《AI 產業人才認定指引》，請針對以下各維度在您實際工作中的符合程度進行填答。</p>
+        </div>
+
+        <!-- Metric category guide -->
+        <div class="bg-slate-100 p-3 rounded-lg flex flex-wrap gap-3 text-xs justify-around border border-slate-200">
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span><span class="font-semibold text-indigo-900">AI 技術應用</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span class="font-semibold text-emerald-900">業務問題解決</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span class="font-semibold text-amber-900">AI 應用與場景整合</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span><span class="font-semibold text-rose-900">數據識讀與治理</span></div>
+        </div>
+
+        <div id="self-eval-container" class="space-y-6 max-h-[400px] overflow-y-auto pr-2">
+          <!-- Dynamic self evaluation questions with Likert scale radio buttons -->
+        </div>
+      </div>
+
+      <!-- STEP 5: 團隊協作領導 -->
+      <div id="step-5" class="step-panel hidden space-y-6">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900 border-l-4 border-ntnu-maroon pl-3">
+            第五階段：團隊協作與 AI 領導力指標
+          </h3>
+          <p class="text-xs text-slate-500 mt-1 pl-4">評估同仁對於資訊中心內部流程推動、跨組別知識傳授，以及帶領團隊行政自動化的意願與能力。</p>
+        </div>
+
+        <div id="collab-container" class="space-y-6 max-h-[400px] overflow-y-auto pr-2">
+          <!-- Team collaboration questions -->
+        </div>
+      </div>
+
+      <!-- STEP 6: 產生評估報告 (PRINTABLE AREA) -->
+      <div id="step-6" class="step-panel hidden space-y-6">
+        <!-- Top controls hidden in Print -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 no-print">
+          <div>
+            <h4 class="font-bold text-slate-800 text-sm">🎉 評估已完成！已生成您的個人AI即戰力報告</h4>
+            <p class="text-xs text-slate-500">您可以直接匯出列印，或存為 PDF。</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="window.print()" class="px-4 py-2 bg-ntnu-maroon hover:bg-rose-950 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-3a2 2 0 00-2-2H9a2 2 0 00-2 2v3a2 2 0 002 2zm0-10V4a2 2 0 012-2h4a2 2 0 012 2v3m-6 0h6"></path></svg>
+              匯出評估報告 (PDF/列印)
+            </button>
+            <button onclick="restartTest()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 rounded-lg text-xs font-medium text-slate-700 transition">
+              重新填寫
+            </button>
+          </div>
+        </div>
+
+        <!-- THE ACTUAL PRINTABLE REPORT CARD -->
+        <div class="border border-slate-300 rounded-2xl p-6 md:p-8 space-y-8 bg-white print-card" id="printable-area">
+          
+          <!-- Report Header -->
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b-2 border-ntnu-maroon pb-4 gap-4">
+            <div>
+              <span class="text-xs font-bold text-ntnu-maroon tracking-wider uppercase bg-rose-50 px-2 py-1 rounded">國立臺灣師範大學資訊中心</span>
+              <h2 class="text-2xl font-black text-slate-900 mt-1">同仁個人 AI 實務能力評估表報告</h2>
+            </div>
+            <div class="text-left md:text-right text-xs text-slate-500">
+              <p>評估日期：<span id="report-date" class="font-mono">--</span></p>
+              <p>安全性：<span class="text-emerald-600 font-semibold">本機沙盒核發 (不落伺服器)</span></p>
+            </div>
+          </div>
+
+          <!-- Section A: Metadata -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <div>
+              <p class="text-slate-400">同仁姓名 / 代碼</p>
+              <p id="rep-name" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
+            </div>
+            <div>
+              <p class="text-slate-400">所屬組別</p>
+              <p id="rep-dept" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
+            </div>
+            <div>
+              <p class="text-slate-400">職等職稱</p>
+              <p id="rep-title" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
+            </div>
+            <div>
+              <p class="text-slate-400">核心定位權重類型</p>
+              <p id="rep-role" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
+            </div>
+          </div>
+
+          <!-- Section B: Evaluation Summary & Analytics -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            
+            <!-- Chart.js Canvas inside dynamic wrapper -->
+            <div class="md:col-span-5 flex flex-col items-center justify-center">
+              <div class="w-full max-w-[280px] h-[280px] relative">
+                <canvas id="radarChart"></canvas>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-2 text-center">能力面向基底分數：1~5 分級指標（依據 AI 產業人才指引）</p>
+            </div>
+
+            <!-- Detailed metric explanation and scores -->
+            <div class="md:col-span-7 space-y-4">
+              <h3 class="text-md font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
+                <span>📊 各核心面向成熟度數據</span>
+                <span id="overall-badge" class="bg-ntnu-maroon text-white text-xs px-2.5 py-0.5 rounded-full font-bold">--</span>
+              </h3>
+              
+              <div class="space-y-3">
+                <div>
+                  <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>AI 技術應用</span>
+                    <span id="score-val-tech" class="font-bold">-- / 5 分</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-1.5">
+                    <div id="score-bar-tech" class="bg-indigo-500 h-1.5 rounded-full" style="width: 0%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>業務問題解決</span>
+                    <span id="score-val-solving" class="font-bold">-- / 5 分</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-1.5">
+                    <div id="score-bar-solving" class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>AI 應用與場景整合</span>
+                    <span id="score-val-integration" class="font-bold">-- / 5 分</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-1.5">
+                    <div id="score-bar-integration" class="bg-amber-500 h-1.5 rounded-full" style="width: 0%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>數據識讀與治理 (含 M365 合規)</span>
+                    <span id="score-val-governance" class="font-bold">-- / 5 分</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-1.5">
+                    <div id="score-bar-governance" class="bg-rose-500 h-1.5 rounded-full" style="width: 0%"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span>團隊協作與領導力</span>
+                    <span id="score-val-collab" class="font-bold">-- / 5 分</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-1.5">
+                    <div id="score-bar-collab" class="bg-violet-500 h-1.5 rounded-full" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Page break for cleaner PDFs -->
+          <div class="page-break"></div>
+
+          <!-- Section C: Selected Core Task Relevance -->
+          <div class="space-y-3">
+            <h3 class="text-sm font-bold text-slate-900 border-l-4 border-ntnu-gold pl-2">
+              📌 本次評估鏈結的資訊中心核心工作項目
+            </h3>
+            <div id="rep-core-tasks" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700">
+              <!-- Selected core tasks will be dynamically populated here -->
+            </div>
+          </div>
+
+          <!-- Section D: Selected Tools -->
+          <div class="space-y-3">
+            <h3 class="text-sm font-bold text-slate-900 border-l-4 border-ntnu-gold pl-2">
+              🛠️ 已部署或常規使用之 AI 工具
+            </h3>
+            <div id="rep-tools-list" class="flex flex-wrap gap-1.5">
+              <!-- Dynamic tool badges -->
+            </div>
+          </div>
+
+          <!-- Section E: Personalized Advice & Analysis -->
+          <div class="space-y-4 pt-2">
+            <h3 class="text-sm font-bold text-slate-900 border-l-4 border-ntnu-gold pl-2">
+              💡 專家定位報告與資訊中心 AI 發展建議
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <span class="text-xs font-semibold text-ntnu-maroon block mb-1">【您的即戰力定位】</span>
+                <p id="advice-position" class="text-xs text-slate-700 leading-relaxed">
+                  評估分析中...
+                </p>
+              </div>
+
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <span class="text-xs font-semibold text-ntnu-maroon block mb-1">【本校 M365 合規安全操作指引】</span>
+                <p id="advice-compliance" class="text-xs text-slate-700 leading-relaxed">
+                  評估分析中...
+                </p>
+              </div>
+            </div>
+
+            <!-- Signature space for print -->
+            <div class="pt-8 flex justify-end gap-12 text-xs text-slate-400 no-screen">
+              <div class="text-center w-36 border-t pt-2">
+                同仁自我簽章
+              </div>
+              <div class="text-center w-36 border-t pt-2">
+                組長/主管審閱簽章
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- FOOTER CONTROLS (No Print) -->
+      <footer class="mt-8 pt-4 border-t border-slate-200/80 flex items-center justify-between no-print">
+        <button id="prev-btn" onclick="prevStep()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          上一步
+        </button>
+        <span class="text-xs text-slate-400">國立臺灣師範大學資訊中心 2026 版權所有</span>
+        <button id="next-btn" onclick="nextStep()" class="px-5 py-2 bg-ntnu-maroon hover:bg-rose-950 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow">
+          下一步
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </footer>
+
+    </div>
+
+    <!-- Clear Cache / Reset (No Print) -->
+    <div class="flex justify-center mt-4 no-print">
+      <button onclick="confirmReset()" class="text-xs text-rose-600 hover:text-rose-800 font-medium flex items-center gap-1 border border-rose-200 bg-rose-50/50 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+        重置此電腦的所有作答紀錄 (一鍵清除、不落痕跡)
+      </button>
+    </div>
+
+  </main>
+
+  <!-- CUSTOM MODAL TOAST FOR NO ALERTS -->
+  <div id="toast-modal" class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300 opacity-0">
+    <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center transform transition-all scale-95 duration-300">
+      <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900" id="toast-title">確認</h3>
+      <p class="text-xs text-slate-500 mt-2" id="toast-message">是否確認清除所有資料？</p>
+      <div class="mt-5 flex gap-2 justify-center">
+        <button id="toast-confirm" class="px-4 py-2 bg-ntnu-maroon text-white text-xs font-bold rounded-lg hover:bg-rose-950 transition">確認</button>
+        <button id="toast-cancel" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-medium rounded-lg hover:bg-slate-200 transition">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global Constants & State
+    let currentStep = 1;
+    let storageMode = 'none'; // 'none' (transient state only in memory), 'session', 'local'
+    let radarChartInstance = null;
+
+    // AI Tools list from attachment 3
+    const aiToolsList = [
+      "ChatGPT", "Microsoft Copilot", "Claude", "Gemini", "Perplexity AI", "Notion AI",
+      "Notta", "Otter.ai", "Whisper", "Gamma", "Canva AI", "Napkin", "Beautiful.ai",
+      "Midjourney", "DALL-E 3", "Stable Diffusion", "Adobe Firefly", "Runway", "Pika Labs",
+      "Kaiber", "Zapier", "Make", "n8n", "Power Automate"
+    ];
+
+    // NTNU IT Center Core Work Items
+    const coreTasks = [
+      { id: "task1", name: "校務行政資訊化與新技術導入維運" },
+      { id: "task2", name: "雲端主機伺服器、虛擬化與校務資料備份備援" },
+      { id: "task3", name: "校園有線、無線、宿舍網路運維與機房安全維護" },
+      { id: "task4", name: "校園資訊安全推廣、防詐騙、個資與弱點掃描業務" },
+      { id: "task5", name: "電腦教室軟硬體設備規劃與一般電腦維護借用服務" },
+      { id: "task6", name: "微軟教育版、授權軟體採購、安裝與推廣服務" },
+      { id: "task7", name: "Moodle 數位學習平台、教學軟體雲與遠端支援維護" },
+      { id: "task8", name: "政府推動 ODF 開放文件格式、自由軟體之整合推廣" },
+      { id: "task9", name: "資訊素養研習課程、電子報、平面與數位宣傳設計" },
+      { id: "task10", name: "資訊委外專案管理、廠商履約督導與系統建置諮詢" }
+    ];
+
+    // Evaluation Questions mapped to standard dimensions in Attachment 2
+    const selfEvalQuestions = [
+      // Dimension 1: AI 技術應用 (AI Tech Application)
+      { id: "q1", text: "我能熟練操作多種 AI 工具，並撰寫精準、具備良好上下文與結構的 Prompt（提示詞）來獲取符合工作需要的產出內容。", dimension: "tech", label: "AI技術應用" },
+      { id: "q2", text: "我能主動核校、微調或精準修改 AI 產出的文字、數據、程式碼，將其有效整合入我負責的行政工作中，不直接照單全收。", dimension: "tech", label: "AI技術應用" },
+      { id: "q3", text: "我能靈活搭配多個 AI 工具（例如語音轉文字搭配摘要工具），並自動化處理日常繁複、重複性的行政作業流程。", dimension: "tech", label: "AI技術應用" },
+      
+      // Dimension 2: 業務問題解決 (Business Problem Solving)
+      { id: "q4", text: "我能針對資訊中心特定的行政或運維場景，主動發想並定義出適合引入 AI 協助的最佳切入點與問題定義。", dimension: "solving", label: "業務問題解決" },
+      { id: "q5", text: "當面對複雜或凌亂的工作資訊時，我能引導 AI 將這些零散的資訊，整理成結構清晰、邏輯分明且立即可用的知識筆記與手冊。", dimension: "solving", label: "業務問題解決" },
+      { id: "q6", text: "我能夠根據不同的業務屬性，靈活選擇最適配的 AI 工具，主動優化現行工作流並有效縮短任務交付時間。", dimension: "solving", label: "業務問題解決" },
+
+      // Dimension 3: AI 應用與場景整合 (AI & Scenario Integration)
+      { id: "q7", text: "我能清晰、系統化地向同仁或長官闡述，中心特定業務在引進 AI 流程後，可以帶來哪些實質價值與成效提升。", dimension: "integration", label: "AI應用與場景整合" },
+      { id: "q8", text: "當 AI 整理好大量校務數據或日誌資訊後，我具有審核其邏輯性與準確性的專業，並主動修正其可能發生的失真、歸類錯誤或偏誤詮釋。", dimension: "integration", label: "AI應用與場景整合" },
+      { id: "q9", text: "我深刻了解不同 AI 技術與模型的適用情境，且在構思解決方案時，能全面考量其可行性、成本效益及使用者體驗。", dimension: "integration", label: "AI應用與場景整合" },
+
+      // Dimension 4: 數據識讀與治理 (Data Literacy & Governance)
+      { id: "q10", text: "在將資料輸入 AI 工具前，我會進行篩選、清洗與「去識別化」（如模糊化同仁或學生個資、隱去機密系統 IP），以確保不外洩機敏資訊。", dimension: "governance", label: "數據識讀與治理" },
+      { id: "q11", text: "我能敏銳辨識 AI 產出內容的潛在偏誤、幻覺（不實言論），並在採用其論點或數據前進行多重查核以確保其真實性。", dimension: "governance", label: "數據識讀與治理" },
+      { id: "q12", text: "我能確保本人或團隊產出的 AI 結果完全符合資訊安全法規、道德標準、智慧財產權，及臺師大 M365 服務之合規使用規範。", dimension: "governance", label: "數據識讀與治理" }
+    ];
+
+    // Collaboration & Leadership
+    const collabQuestions = [
+      { id: "c1", text: "我曾與資訊中心的其他同仁、同組夥伴，主動分享與講授自己撰寫的優秀 Prompt 或 AI 加速流程心法。" },
+      { id: "c2", text: "在中心內部專案中，我能扮演帶領者的角色，與不同組別、領域的人才一同協作推動 AI 的具體應用導入。" },
+      { id: "c3", text: "我會持續追蹤主流 AI 的最新動態與科技政策，並思考如何將這些新型態工具引入資訊中心的長遠規劃中。" }
+    ];
+
+    // App State object (in-memory)
+    let appState = {
+      userName: "",
+      userDept: "",
+      userTitle: "",
+      userRole: "",
+      selectedTools: [],
+      cases: {
+        case1: "",
+        case2: "",
+        case3: ""
+      },
+      selectedCoreTasks: [],
+      selfEvalAnswers: {}, // id: score (1-5)
+      collabAnswers: {} // id: score (1-5)
+    };
+
+    // Initialization on window load
+    window.onload = function() {
+      renderTools();
+      renderCoreTasks();
+      renderSelfEval();
+      renderCollab();
+      
+      // Attempt to load from storage if preference saved
+      const savedMode = localStorage.getItem('ntnu-ai-storage-mode') || 'none';
+      setStorageMode(savedMode, true); // true means skip saving back again in loading cycle
+      
+      goToStep(1);
+    };
+
+    // Render Tools Checkboxes
+    function renderTools() {
+      const container = document.getElementById('tools-container');
+      container.innerHTML = aiToolsList.map(tool => {
+        return `
+          <label class="flex items-center gap-2.5 p-3 rounded-lg border border-slate-200/80 hover:bg-slate-50 transition cursor-pointer select-none text-xs">
+            <input type="checkbox" name="ai-tools" value="${tool}" onchange="updateToolSelection()" class="w-4 h-4 text-ntnu-maroon focus:ring-ntnu-maroon border-slate-300 rounded">
+            <span class="font-medium text-slate-700">${tool}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    // Render Core Tasks Checkboxes
+    function renderCoreTasks() {
+      const container = document.getElementById('core-tasks-list');
+      container.innerHTML = coreTasks.map(task => {
+        return `
+          <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-rose-50/30 transition cursor-pointer select-none text-xs">
+            <input type="checkbox" name="core-tasks" value="${task.id}" onchange="updateCoreTaskSelection()" class="mt-0.5 w-4 h-4 text-ntnu-maroon focus:ring-ntnu-maroon border-slate-300 rounded">
+            <div>
+              <span class="font-bold text-slate-800 block">${task.name}</span>
+            </div>
+          </label>
+        `;
+      }).join('');
+    }
+
+    // Render Self Evaluation (Step 4)
+    function renderSelfEval() {
+      const container = document.getElementById('self-eval-container');
+      
+      const categoryThemes = {
+        tech: { bg: 'bg-indigo-50 border-indigo-200 text-indigo-700', bullet: 'bg-indigo-500' },
+        solving: { bg: 'bg-emerald-50 border-emerald-200 text-emerald-700', bullet: 'bg-emerald-500' },
+        integration: { bg: 'bg-amber-50 border-amber-200 text-amber-700', bullet: 'bg-amber-500' },
+        governance: { bg: 'bg-rose-50 border-rose-200 text-rose-700', bullet: 'bg-rose-500' }
+      };
+
+      container.innerHTML = selfEvalQuestions.map((q, idx) => {
+        const theme = categoryThemes[q.dimension];
+        return `
+          <div class="p-5 rounded-xl border border-slate-200 space-y-4 shadow-sm bg-white hover:border-slate-300 transition">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span class="font-bold text-slate-400">問題 ${idx + 1}</span>
+              <span class="px-2.5 py-1 rounded-full border font-semibold ${theme.bg} flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full ${theme.bullet}"></span>
+                ${q.label}
+              </span>
+            </div>
+            <p class="text-sm font-semibold text-slate-800 leading-relaxed">${q.text}</p>
+            
+            <div class="grid grid-cols-5 gap-1 pt-1">
+              ${[5, 4, 3, 2, 1].map(score => {
+                const labels = { 5: "非常符合", 4: "符合", 3: "普通", 2: "不符合", 1: "非常不符合" };
+                return `
+                  <label class="flex flex-col items-center p-2.5 rounded-lg border border-slate-200/80 hover:bg-slate-50 transition cursor-pointer text-center select-none">
+                    <input type="radio" name="eval-${q.id}" value="${score}" onchange="saveEvalAnswer('${q.id}', ${score})" class="w-4 h-4 text-ntnu-maroon focus:ring-ntnu-maroon border-slate-300">
+                    <span class="text-[10px] text-slate-500 mt-1.5 font-medium">${labels[score]}</span>
+                  </label>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Collaboration questions (Step 5)
+    function renderCollab() {
+      const container = document.getElementById('collab-container');
+      container.innerHTML = collabQuestions.map((q, idx) => {
+        return `
+          <div class="p-5 rounded-xl border border-slate-200 space-y-4 shadow-sm bg-white hover:border-slate-300 transition">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-400">協作指標 ${idx + 1}</span>
+              <span class="px-2.5 py-1 rounded-full border border-violet-200 bg-violet-50 text-violet-700 font-semibold flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                團隊協作與領導力
+              </span>
+            </div>
+            <p class="text-sm font-semibold text-slate-800 leading-relaxed">${q.text}</p>
+            
+            <div class="grid grid-cols-5 gap-1 pt-1">
+              ${[5, 4, 3, 2, 1].map(score => {
+                const labels = { 5: "非常符合", 4: "符合", 3: "普通", 2: "不符合", 1: "非常不符合" };
+                return `
+                  <label class="flex flex-col items-center p-2.5 rounded-lg border border-slate-200/80 hover:bg-slate-50 transition cursor-pointer text-center select-none">
+                    <input type="radio" name="collab-${q.id}" value="${score}" onchange="saveCollabAnswer('${q.id}', ${score})" class="w-4 h-4 text-ntnu-maroon focus:ring-ntnu-maroon border-slate-300">
+                    <span class="text-[10px] text-slate-500 mt-1.5 font-medium">${labels[score]}</span>
+                  </label>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update Local/Session Storage or sync in Memory
+    function setStorageMode(mode, loadInitial = false) {
+      storageMode = mode;
+      
+      // Update header buttons UI
+      const buttons = {
+        none: document.getElementById('store-none'),
+        session: document.getElementById('store-session'),
+        local: document.getElementById('store-local')
+      };
+
+      Object.keys(buttons).forEach(key => {
+        if (key === mode) {
+          buttons[key].className = "px-2.5 py-1 rounded text-[11px] transition-all font-semibold bg-ntnu-maroon text-white shadow";
+        } else {
+          buttons[key].className = "px-2.5 py-1 rounded text-[11px] transition-all text-slate-300 hover:text-white";
+        }
+      });
+
+      localStorage.setItem('ntnu-ai-storage-mode', mode);
+
+      if (loadInitial) {
+        loadDataFromActiveStorage();
+      } else {
+        saveCurrentState();
+      }
+    }
+
+    // Save Data to Storage
+    function saveCurrentState() {
+      // Sync UI state to appState object
+      appState.userName = document.getElementById('user-name').value;
+      appState.userDept = document.getElementById('user-dept').value;
+      appState.userTitle = document.getElementById('user-title').value;
+      appState.userRole = document.getElementById('user-role').value;
+      appState.cases.case1 = document.getElementById('app-case-1').value;
+      appState.cases.case2 = document.getElementById('app-case-2').value;
+      appState.cases.case3 = document.getElementById('app-case-3').value;
+
+      if (storageMode === 'local') {
+        localStorage.setItem('ntnu-ai-assessment-data', JSON.stringify(appState));
+        sessionStorage.removeItem('ntnu-ai-assessment-data');
+      } else if (storageMode === 'session') {
+        sessionStorage.setItem('ntnu-ai-assessment-data', JSON.stringify(appState));
+        localStorage.removeItem('ntnu-ai-assessment-data');
+      } else {
+        // Mode 'none': explicitly remove any browser-side transient backups to guarantee extreme privacy on reload
+        localStorage.removeItem('ntnu-ai-assessment-data');
+        sessionStorage.removeItem('ntnu-ai-assessment-data');
+      }
+    }
+
+    // Load Data from active storage mode
+    function loadDataFromActiveStorage() {
+      let savedDataStr = null;
+      if (storageMode === 'local') {
+        savedDataStr = localStorage.getItem('ntnu-ai-assessment-data');
+      } else if (storageMode === 'session') {
+        savedDataStr = sessionStorage.getItem('ntnu-ai-assessment-data');
+      }
+
+      if (savedDataStr) {
+        try {
+          const parsed = JSON.parse(savedDataStr);
+          if (parsed) {
+            appState = { ...appState, ...parsed };
+            // Populate basic info inputs
+            document.getElementById('user-name').value = appState.userName || "";
+            document.getElementById('user-dept').value = appState.userDept || "";
+            document.getElementById('user-title').value = appState.userTitle || "";
+            document.getElementById('user-role').value = appState.userRole || "";
+            document.getElementById('app-case-1').value = appState.cases?.case1 || "";
+            document.getElementById('app-case-2').value = appState.cases?.case2 || "";
+            document.getElementById('app-case-3').value = appState.cases?.case3 || "";
+
+            // Populate checked tools
+            const toolBoxes = document.querySelectorAll('input[name="ai-tools"]');
+            toolBoxes.forEach(box => {
+              box.checked = appState.selectedTools.includes(box.value);
+            });
+
+            // Populate checked core tasks
+            const taskBoxes = document.querySelectorAll('input[name="core-tasks"]');
+            taskBoxes.forEach(box => {
+              box.checked = appState.selectedCoreTasks.includes(box.value);
+            });
+
+            // Populate self evaluation answers
+            Object.keys(appState.selfEvalAnswers).forEach(qId => {
+              const rBtn = document.querySelector(`input[name="eval-${qId}"][value="${appState.selfEvalAnswers[qId]}"]`);
+              if (rBtn) rBtn.checked = true;
+            });
+
+            // Populate collab answers
+            Object.keys(appState.collabAnswers).forEach(cId => {
+              const rBtn = document.querySelector(`input[name="collab-${cId}"][value="${appState.collabAnswers[cId]}"]`);
+              if (rBtn) rBtn.checked = true;
+            });
+          }
+        } catch (e) {
+          console.error("Error loading backup state:", e);
+        }
+      }
+    }
+
+    // Form selection updates
+    function updateToolSelection() {
+      const selected = [];
+      document.querySelectorAll('input[name="ai-tools"]:checked').forEach(box => {
+        selected.push(box.value);
+      });
+      appState.selectedTools = selected;
+      saveCurrentState();
+    }
+
+    function updateCoreTaskSelection() {
+      const selected = [];
+      document.querySelectorAll('input[name="core-tasks"]:checked').forEach(box => {
+        selected.push(box.value);
+      });
+      appState.selectedCoreTasks = selected;
+      saveCurrentState();
+    }
+
+    function saveEvalAnswer(qId, score) {
+      appState.selfEvalAnswers[qId] = score;
+      saveCurrentState();
+    }
+
+    function saveCollabAnswer(cId, score) {
+      appState.collabAnswers[cId] = score;
+      saveCurrentState();
+    }
+
+    // Step navigation controller
+    function goToStep(step) {
+      currentStep = step;
+      saveCurrentState();
+
+      // Show/Hide step panel divs
+      document.querySelectorAll('.step-panel').forEach((panel, index) => {
+        if (index + 1 === step) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      });
+
+      // Update stepper buttons visuals
+      for (let i = 1; i <= 6; i++) {
+        const btn = document.getElementById(`step-btn-${i}`);
+        if (i === step) {
+          btn.className = "py-2 px-1 text-xs font-bold rounded-lg border-b-4 transition-all border-ntnu-maroon text-ntnu-maroon bg-slate-50";
+        } else {
+          btn.className = "py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50";
+        }
+      }
+
+      // Update progress bar
+      const percent = Math.round((step / 6) * 100);
+      document.getElementById('progress-bar').style.width = `${percent}%`;
+      document.getElementById('progress-percent').innerText = `${percent}%`;
+
+      // Footer buttons toggles
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+
+      prevBtn.disabled = (step === 1);
+      
+      if (step === 6) {
+        nextBtn.innerHTML = `
+          產出報告成功
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        `;
+        nextBtn.disabled = true;
+        nextBtn.classList.add('opacity-50');
+        
+        generateReportData();
+      } else {
+        nextBtn.innerHTML = `
+          下一步
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        `;
+        nextBtn.disabled = false;
+        nextBtn.classList.remove('opacity-50');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextStep() {
+      if (currentStep < 6) {
+        // Basic validations
+        if (currentStep === 1) {
+          const name = document.getElementById('user-name').value.trim();
+          const dept = document.getElementById('user-dept').value;
+          if (!name || !dept) {
+            showToast("資訊未填寫完整", "請先輸入您的『姓名』與『所屬組別』以利報表識別！");
+            return;
+          }
+        }
+        if (currentStep === 3 && appState.selectedCoreTasks.length === 0) {
+          showToast("核心公務未選取", "請至少勾選一項您日常負責的資訊中心『核心工作項目』！");
+          return;
+        }
+
+        goToStep(currentStep + 1);
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 1) {
+        goToStep(currentStep - 1);
+      }
+    }
+
+    // Modal Toast Engine (Avoid Browser Alerts)
+    function showToast(title, message, isConfirm = false, onConfirmCallback = null) {
+      const modal = document.getElementById('toast-modal');
+      const titleEl = document.getElementById('toast-title');
+      const msgEl = document.getElementById('toast-message');
+      const confirmBtn = document.getElementById('toast-confirm');
+      const cancelBtn = document.getElementById('toast-cancel');
+
+      titleEl.innerText = title;
+      msgEl.innerText = message;
+
+      if (isConfirm) {
+        cancelBtn.classList.remove('hidden');
+        confirmBtn.onclick = function() {
+          modal.classList.add('hidden');
+          if (onConfirmCallback) onConfirmCallback();
+        };
+      } else {
+        cancelBtn.classList.add('hidden');
+        confirmBtn.onclick = function() {
+          modal.classList.add('hidden');
+        };
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('opacity-100');
+    }
+
+    document.getElementById('toast-cancel').onclick = function() {
+      document.getElementById('toast-modal').classList.add('hidden');
+    };
+
+    // Calculate report statistics & populate report layout
+    function generateReportData() {
+      // 1. Fill basic metadata
+      document.getElementById('rep-name').innerText = appState.userName || "同仁";
+      document.getElementById('rep-dept').innerText = appState.userDept || "資訊中心";
+      document.getElementById('rep-title').innerText = appState.userTitle || "行政人員";
+      document.getElementById('rep-role').innerText = appState.userRole || "未定義";
+      
+      const today = new Date();
+      document.getElementById('report-date').innerText = today.toLocaleDateString('zh-TW', {
+        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+      });
+
+      // 2. Score mapping and averages
+      const scoreMapping = { tech: [], solving: [], integration: [], governance: [] };
+      
+      // Map self eval questions to dimension scores
+      selfEvalQuestions.forEach(q => {
+        const ans = appState.selfEvalAnswers[q.id] || 3; // default to 'ordinary' = 3 if skipped
+        scoreMapping[q.dimension].push(ans);
+      });
+
+      // Map collab score
+      const collabScores = collabQuestions.map(c => appState.collabAnswers[c.id] || 3);
+
+      const avg = arr => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : "3.0";
+
+      const scores = {
+        tech: parseFloat(avg(scoreMapping.tech)),
+        solving: parseFloat(avg(scoreMapping.solving)),
+        integration: parseFloat(avg(scoreMapping.integration)),
+        governance: parseFloat(avg(scoreMapping.governance)),
+        collab: parseFloat(avg(collabScores))
+      };
+
+      // 3. Update scores and progress bars
+      const updateScoreRow = (key, score) => {
+        document.getElementById(`score-val-${key}`).innerText = `${score} / 5 分`;
+        document.getElementById(`score-bar-${key}`).style.width = `${(score / 5) * 100}%`;
+      };
+
+      updateScoreRow('tech', scores.tech);
+      updateScoreRow('solving', scores.solving);
+      updateScoreRow('integration', scores.integration);
+      updateScoreRow('governance', scores.governance);
+      updateScoreRow('collab', scores.collab);
+
+      // 4. Position and badges calculation
+      const overallAvg = parseFloat(((scores.tech + scores.solving + scores.integration + scores.governance + scores.collab) / 5).toFixed(1));
+      let positionTitle = "AI 探索觀察員";
+      let positionText = "";
+
+      if (overallAvg >= 4.5) {
+        positionTitle = "AI 戰略先驅領航者";
+        positionText = "您對多項 generative AI 工具熟練度極高，具備深厚的提示詞工程技能與前瞻的業務改造野心。特別是在與校園業務鏈結、防範資安外洩（數據去識別化）上表現出眾。建議您主動擔任中心內部的 AI 流程顧問，帶領跨組別同仁研發公務自動化與知識筆記整合工作流。";
+      } else if (overallAvg >= 3.8) {
+        positionTitle = "行政 AI 實踐推動官";
+        positionText = "您能妥善且高效地在日常行政和系統維護中運用 AI 工具提升產出，具備良好的數據識讀力與資安預警概念。您是資訊中心不可或缺的中堅戰力。建議進一步深造更高階的 AI 自動化工具整合（例如 Power Automate 與 M365 Copilot），並多與同仁進行技術分享，成為組內的 AI 流程關鍵推動手。";
+      } else if (overallAvg >= 3.0) {
+        positionTitle = "行政 AI 整合應用家";
+        positionText = "您已具備主流 AI 工具（如 ChatGPT、Copilot）的基本操作能力，能處理簡易的資料清洗、重點摘要和語氣潤飾。建議持續強化「數據識讀」與「安全防範」觀念，將評核中所學的『去識別化原則』落實於日常文書處理中。未來可藉由積極參與中心開設的資訊素養教育，提升更複雜業務的解決力。";
+      } else {
+        positionTitle = "AI 業務學習探索者";
+        positionText = "您目前正處於 AI 應用的探索起點。建議利用學校完整的 M365 全校授權，從最安全的 Microsoft Copilot 開始入手，嘗試使用 AI 協助自動產生會議記錄草稿、潤飾日常行政信件，循序漸進提高辦公生產力。";
+      }
+
+      document.getElementById('overall-badge').innerText = `綜合評估：${positionTitle} (${overallAvg}分)`;
+      document.getElementById('advice-position').innerHTML = `
+        <strong class="text-ntnu-maroon text-sm block mb-1">【${positionTitle}】 (總平均：${overallAvg} / 5 分)</strong>
+        ${positionText}
+      `;
+
+      // 5. Compliance advice derived from attachment (NTNU M365 policy checklist)
+      let complianceScore = scores.governance;
+      let complianceAdvice = "";
+      if (complianceScore >= 4.0) {
+        complianceAdvice = "您的數據治理與合規敏感度極高！在您將業務資料輸入 AI 之前，能主動做到去識別化與隱密化，完美契合教育部與臺師大 M365「不得使用非公務環境儲存或收發機密個資」的規範。請繼續保持並將此標準推廣至同仁。";
+      } else if (complianceScore >= 3.0) {
+        complianceAdvice = "您具備基本的資訊安全與版權合規概念。再次提醒您：臺師大資訊中心要求『所有包含姓名、學號、薪資或內部機房系統架構』等敏感個資，在不具備封閉式地端模型防護下，均不得直接貼入公開的生成式 AI 對話框中。建議在處理行政資料前先手動遮蔽敏感字段。";
+      } else {
+        complianceAdvice = "資安與治理概念需即刻加強！請注意，若將校內公務信件、伺服器 log 或學生個資直接上傳至未受全校企業版安全協議保護的公開 AI 工具，將面臨極高洩密與違法風險。後續操作時，強烈建議僅限於使用校內合規的受保護 Microsoft 365 企業帳號進行內部公務處理。";
+      }
+      document.getElementById('advice-compliance').innerText = complianceAdvice;
+
+      // 6. Draw core tasks selected list
+      const repCoreTasksContainer = document.getElementById('rep-core-tasks');
+      if (appState.selectedCoreTasks.length > 0) {
+        repCoreTasksContainer.innerHTML = appState.selectedCoreTasks.map(taskId => {
+          const taskObj = coreTasks.find(t => t.id === taskId);
+          return `
+            <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
+              <span class="text-ntnu-gold text-sm">★</span>
+              <span>${taskObj ? taskObj.name : "未知業務項目"}</span>
+            </div>
+          `;
+        }).join('');
+      } else {
+        repCoreTasksContainer.innerHTML = `<span class="text-slate-400 italic">無勾選特定核心工作項目</span>`;
+      }
+
+      // 7. Draw selected tools list
+      const repToolsContainer = document.getElementById('rep-tools-list');
+      if (appState.selectedTools.length > 0) {
+        repToolsContainer.innerHTML = appState.selectedTools.map(tool => {
+          return `
+            <span class="bg-ntnu-maroon/10 text-ntnu-maroon text-[11px] font-semibold px-2.5 py-1 rounded-full border border-ntnu-maroon/20">
+              ${tool}
+            </span>
+          `;
+        }).join('');
+      } else {
+        repToolsContainer.innerHTML = `<span class="text-slate-400 italic text-xs">無常用工具勾選記錄</span>`;
+      }
+
+      // 8. Generate Radar Chart
+      setTimeout(() => {
+        renderRadarChart(scores);
+      }, 100);
+    }
+
+    // Chart.js Radar Render Engine
+    function renderRadarChart(scores) {
+      const ctx = document.getElementById('radarChart').getContext('2d');
+      
+      if (radarChartInstance) {
+        radarChartInstance.destroy();
+      }
+
+      radarChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: [
+            'AI技術應用',
+            '業務問題解決',
+            '應用與場景整合',
+            '數據識讀與治理',
+            '團隊協作領導力'
+          ],
+          datasets: [{
+            label: '實務成熟度分佈 (1~5分)',
+            data: [scores.tech, scores.solving, scores.integration, scores.governance, scores.collab],
+            backgroundColor: 'rgba(123, 24, 36, 0.2)', // translucent ntnu maroon
+            borderColor: '#7B1824',
+            borderWidth: 2,
+            pointBackgroundColor: '#D4AF37',
+            pointBorderColor: '#FFF',
+            pointHoverBackgroundColor: '#FFF',
+            pointHoverBorderColor: '#7B1824',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            r: {
+              angleLines: {
+                display: true,
+                color: 'rgba(0, 0, 0, 0.1)'
+              },
+              suggestedMin: 1,
+              suggestedMax: 5,
+              ticks: {
+                stepSize: 1,
+                font: {
+                  size: 9
+                }
+              },
+              pointLabels: {
+                font: {
+                  family: 'PingFang TC, Microsoft JhengHei, sans-serif',
+                  size: 11,
+                  weight: 'bold'
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // JSON export/backup capability for highly compliant offline usage
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `NTNU-AI-Assessment-${appState.userName || '同仁'}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function triggerImport() {
+      document.getElementById('import-file').click();
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported) {
+            appState = imported;
+            // Write transient state and refresh UI
+            saveCurrentState();
+            setStorageMode(storageMode, true);
+            showToast("匯入成功", "您的作答備份已成功復原！正在為您重新載入資料。");
+          }
+        } catch (err) {
+          showToast("匯入失敗", "上傳的 JSON 檔案格式不正確，無法復原資料。");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Restart process
+    function restartTest() {
+      showToast("確認重新填寫", "這將重新開始評估流程，您是否確認？", true, () => {
+        // Reset responses
+        appState.selectedTools = [];
+        appState.selectedCoreTasks = [];
+        appState.selfEvalAnswers = {};
+        appState.collabAnswers = {};
+        appState.cases = { case1: "", case2: "", case3: "" };
+
+        // Uncheck all in DOM
+        document.querySelectorAll('input[type="checkbox"]').forEach(box => box.checked = false);
+        document.querySelectorAll('input[type="radio"]').forEach(btn => btn.checked = false);
+        document.querySelectorAll('textarea').forEach(area => area.value = "");
+
+        saveCurrentState();
+        goToStep(1);
+      });
+    }
+
+    // Hard reset of this browser context
+    function confirmReset() {
+      showToast("清除本機電腦紀錄", "這將徹底從您的瀏覽器快取 (localStorage/sessionStorage) 中抹除所有填寫痕跡，是否確認？", true, () => {
+        localStorage.removeItem('ntnu-ai-assessment-data');
+        sessionStorage.removeItem('ntnu-ai-assessment-data');
+        appState = {
+          userName: "",
+          userDept: "",
+          userTitle: "",
+          userRole: "",
+          selectedTools: [],
+          cases: { case1: "", case2: "", case3: "" },
+          selectedCoreTasks: [],
+          selfEvalAnswers: {},
+          collabAnswers: {}
+        };
+        // Uncheck all in DOM
+        document.querySelectorAll('input[type="checkbox"]').forEach(box => box.checked = false);
+        document.querySelectorAll('input[type="radio"]').forEach(btn => btn.checked = false);
+        document.querySelectorAll('textarea').forEach(area => area.value = "");
+        document.getElementById('user-name').value = "";
+        document.getElementById('user-dept').value = "";
+        document.getElementById('user-title').value = "";
+        document.getElementById('user-role').value = "";
+
+        saveCurrentState();
+        goToStep(1);
+        showToast("重置成功", "所有作答資料已完全銷毀。");
+      });
+    }
+  </script>
+</body>
+</html>
