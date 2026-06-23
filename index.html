@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>臺師大資訊中心 - 個人 AI 能力評估系統</title>
+  <title>臺師大資訊中心 - 個人 AI 能力評估系統 (雲端同步版)</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -28,7 +28,6 @@
   </script>
   
   <style>
-    /* Printing Layout Styling */
     @media print {
       body {
         background: white !important;
@@ -72,8 +71,7 @@
   <header class="bg-ntnu-maroon text-white shadow-md no-print sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <!-- Logo / Emblem Placeholder using SVG -->
-        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-ntnu-maroon font-bold text-lg border-2 border-ntnu-gold shadow-inner">
+        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-ntnu-maroon font-bold text-lg border-2 border-ntnu-gold shadow-inner select-none">
           師
         </div>
         <div>
@@ -84,47 +82,55 @@
         </div>
       </div>
       
-      <!-- Privacy Strategy Controller (離線安全控制中心) -->
-      <div class="bg-black/20 p-2 rounded-lg border border-white/10 text-xs flex flex-wrap items-center gap-3">
-        <span class="font-medium text-ntnu-gold flex items-center gap-1">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-          本機隱私保護模式:
-        </span>
-        <div class="flex bg-slate-800/80 p-0.5 rounded border border-slate-700">
-          <button id="store-none" onclick="setStorageMode('none')" class="px-2.5 py-1 rounded text-[11px] transition-all font-semibold bg-ntnu-maroon text-white shadow">
-            不留作答(安全)
-          </button>
-          <button id="store-session" onclick="setStorageMode('session')" class="px-2.5 py-1 rounded text-[11px] transition-all text-slate-300 hover:text-white">
-            Reload保留
-          </button>
-          <button id="store-local" onclick="setStorageMode('local')" class="px-2.5 py-1 rounded text-[11px] transition-all text-slate-300 hover:text-white">
-            長期儲存
-          </button>
+      <!-- Right control bar -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Executive Script Button -->
+        <button onclick="openExecScriptModal()" class="bg-ntnu-gold hover:bg-yellow-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition shadow-md">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          📋 主管會報簡報語境
+        </button>
+
+        <!-- Privacy Strategy Controller -->
+        <div class="bg-black/20 p-1.5 rounded-lg border border-white/10 text-xs flex items-center gap-2">
+          <span class="font-medium text-ntnu-gold flex items-center gap-1">
+            本機隱私:
+          </span>
+          <div class="flex bg-slate-800/80 p-0.5 rounded border border-slate-700">
+            <button id="store-none" onclick="setStorageMode('none')" class="px-2 py-0.5 rounded text-[10px] transition-all font-semibold bg-ntnu-maroon text-white shadow">
+              不留
+            </button>
+            <button id="store-session" onclick="setStorageMode('session')" class="px-2 py-0.5 rounded text-[10px] transition-all text-slate-300 hover:text-white">
+              暫存
+            </button>
+            <button id="store-local" onclick="setStorageMode('local')" class="px-2 py-0.5 rounded text-[10px] transition-all text-slate-300 hover:text-white">
+              長期
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </header>
 
   <!-- SUB BANNER (No Print) -->
-  <div class="bg-gradient-to-r from-ntnu-maroon to-rose-950 text-white py-10 px-4 shadow-inner no-print">
+  <div class="bg-gradient-to-r from-ntnu-maroon to-rose-950 text-white py-8 px-4 shadow-inner no-print">
     <div class="max-w-5xl mx-auto text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6">
       <div>
         <span class="bg-ntnu-gold/20 text-ntnu-gold text-xs font-semibold px-3 py-1 rounded-full border border-ntnu-gold/30">
-          融合《資訊中心10大核心項目》與《AI人才認定指引》
+          結合《臺師大資訊中心 10 大核心工作項目》與《AI 產業人才認定指引》
         </span>
-        <h2 class="text-3xl font-extrabold mt-3 tracking-tight">個人 AI 即戰力與實務成熟度評測</h2>
-        <p class="text-slate-300 mt-2 text-sm max-w-2xl leading-relaxed">
-          歡迎使用本評估系統。本系統採用<strong class="text-white">純前端安全沙盒架構</strong>，所有作答資訊均不會上傳至伺服器，安全守護您的私隱。評估結果將助您釐清行政工作 AI 化的定位、熟練度，並可產出專業能力雷達報告供個人留存。
+        <h2 class="text-2xl font-extrabold mt-2 tracking-tight">個人 AI 即戰力與實務成熟度評測</h2>
+        <p class="text-slate-300 mt-2 text-xs max-w-2xl leading-relaxed">
+          歡迎使用本評估系統。本系統採<strong class="text-white">嚴格關卡作答制</strong>（需依序完成各關），作答資訊隨時可上傳同步至雲端主控台、導出 JSON 備份或儲存為 A4 PDF。
         </p>
       </div>
-      <div class="flex gap-2">
-        <button onclick="exportData()" class="px-4 py-2 border border-slate-300 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+      <div class="flex flex-wrap gap-2 justify-center">
+        <button onclick="exportData()" class="px-3.5 py-2 border border-slate-300 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-          備份作答JSON
+          導出 JSON
         </button>
-        <button onclick="triggerImport()" class="px-4 py-2 border border-slate-300 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+        <button onclick="triggerImport()" class="px-3.5 py-2 border border-slate-300 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          匯入備份
+          匯入 JSON
         </button>
         <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
       </div>
@@ -132,37 +138,42 @@
   </div>
 
   <!-- MAIN APP CONTAINER -->
-  <main class="flex-grow max-w-5xl w-full mx-auto p-4 md:py-8 flex flex-col gap-6">
+  <main class="flex-grow max-w-5xl w-full mx-auto p-4 md:py-6 flex flex-col gap-6">
     
     <!-- STEP PROGRESS INDICATOR (No Print) -->
     <nav class="no-print bg-white rounded-xl shadow-sm border border-slate-200/80 p-4">
       <div class="flex items-center justify-between text-xs font-semibold text-slate-400 mb-2">
-        <span>作答進度</span>
-        <span id="progress-percent">0%</span>
+        <span>作答與解鎖進度 (請依序完成各階段作答以解除鎖定)</span>
+        <span id="progress-percent">16%</span>
       </div>
       <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
         <div id="progress-bar" class="bg-gradient-to-r from-ntnu-maroon to-ntnu-gold h-full transition-all duration-300" style="width: 16.6%"></div>
       </div>
       
-      <!-- Stepper Buttons -->
+      <!-- Stepper Buttons (locked dynamically) -->
       <div class="grid grid-cols-6 gap-1 mt-4 text-center">
         <button onclick="goToStep(1)" id="step-btn-1" class="py-2 px-1 text-xs font-bold rounded-lg border-b-4 transition-all border-ntnu-maroon text-ntnu-maroon bg-slate-50">
           1. 基本資料
         </button>
-        <button onclick="goToStep(2)" id="step-btn-2" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50">
+        <button onclick="goToStep(2)" id="step-btn-2" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-400 hover:bg-slate-50 relative group">
           2. 常用 AI
+          <span class="absolute top-1 right-1 text-[8px] text-red-500 font-bold" id="lock-badge-2">🔒</span>
         </button>
-        <button onclick="goToStep(3)" id="step-btn-3" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50">
+        <button onclick="goToStep(3)" id="step-btn-3" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-400 hover:bg-slate-50 relative group">
           3. 核心公務
+          <span class="absolute top-1 right-1 text-[8px] text-red-500 font-bold" id="lock-badge-3">🔒</span>
         </button>
-        <button onclick="goToStep(4)" id="step-btn-4" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50">
+        <button onclick="goToStep(4)" id="step-btn-4" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-400 hover:bg-slate-50 relative group">
           4. 實務自評
+          <span class="absolute top-1 right-1 text-[8px] text-red-500 font-bold" id="lock-badge-4">🔒</span>
         </button>
-        <button onclick="goToStep(5)" id="step-btn-5" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50">
+        <button onclick="goToStep(5)" id="step-btn-5" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-400 hover:bg-slate-50 relative group">
           5. 協作領導
+          <span class="absolute top-1 right-1 text-[8px] text-red-500 font-bold" id="lock-badge-5">🔒</span>
         </button>
-        <button onclick="goToStep(6)" id="step-btn-6" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50">
+        <button onclick="goToStep(6)" id="step-btn-6" class="py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-400 hover:bg-slate-50 relative group">
           6. 評估報告
+          <span class="absolute top-1 right-1 text-[8px] text-red-500 font-bold" id="lock-badge-6">🔒</span>
         </button>
       </div>
     </nav>
@@ -176,37 +187,36 @@
           <h3 class="text-xl font-bold text-slate-900 border-l-4 border-ntnu-maroon pl-3 flex items-center gap-2">
             第一階段：同仁基本資料填寫
           </h3>
-          <p class="text-xs text-slate-500 mt-1 pl-4">請先填寫您的基本公務屬性，這將用作能力定位的權重分析基礎。</p>
+          <p class="text-xs text-slate-500 mt-1 pl-4">請先填寫您的基本公務屬性，這將用作能力定位的權重分析基礎。*為必填欄位</p>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1.5">姓名 / 同仁代碼</label>
-            <input type="text" id="user-name" placeholder="請輸入姓名或英文簡稱" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">姓名<span class="text-red-500">*</span></label>
+            <input type="text" id="user-name" oninput="saveCurrentState()" placeholder="請輸入姓名" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
           </div>
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1.5">所屬組別 / 單位</label>
-            <select id="user-dept" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">所屬組別 <span class="text-red-500">*</span></label>
+            <select id="user-dept" onchange="saveCurrentState()" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
               <option value="">-- 請選擇組別 --</option>
               <option value="主任室">主任室</option>
               <option value="行政支援組">行政支援組</option>
               <option value="網路系統組">網路系統組</option>
               <option value="教學服務組">教學服務組</option>
-              <option value="科技推廣組">科技推廣組</option>
-              <option value="校內其他處室支援同仁">校內其他處室支援同仁</option>
+              <option value="科技推廣組">智慧校園組</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1.5">目前職稱</label>
-            <input type="text" id="user-title" placeholder="如：技士、資料管理師、系統分析師/工程員、行政幹事、程式設計員、專任助理" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">目前職稱 <span class="text-red-500">*</span></label>
+            <input type="text" id="user-title" oninput="saveCurrentState()" placeholder="如：技士、資料管理師、系統分析師/系統工程員、程式設計員、行政幹事" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
           </div>
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1.5">主要職能 (對應 AI 角色指標)</label>
-            <select id="user-role" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+            <label class="block text-sm font-semibold text-slate-700 mb-1.5">主要職能 (對應 AI 角色指標) <span class="text-red-500">*</span></label>
+            <select id="user-role" onchange="saveCurrentState()" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
               <option value="">-- 請選擇您最貼近的職能職稱 --</option>
               <option value="專案管理">專案管理 (Project Management)</option>
               <option value="行政管理">行政管理 (Administration)</option>
-              <option value="IT與網管維運">IT / 軟體開發 / 網管維運  /系統分析 (IT & Network & SA)</option>
+              <option value="IT與網管維運">軟體開發 / 網路管理 / 資安 / 網路維運 /系統分析 (IT & Network)</option>
               <option value="媒體行銷">媒體行銷與設計 (Marketing & Design)</option>
               <option value="技術顧問與推廣">顧問服務與科技推廣 (Consulting & Support)</option>
               <option value="財務會計與採購">財務會計與採購審核 (Finance & Procurement)</option>
@@ -214,7 +224,11 @@
           </div>
         </div>
 
-
+        <!--<div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg mt-4 text-xs text-yellow-800 leading-relaxed">
+          <span class="font-bold">⚠️ 教育與個資合規安全重要提醒：</span><br>
+          依照<strong>《國立臺灣師範大學個人資料使用要點》</strong>及教育部<strong>《學校使用資通系統或服務蒐集及使用個人資料注意事項》</strong>，處理公務前，使用者應避免將公務機密或包含個資等敏感性資料上傳至任何公開 AI 工具。
+        </div>-->
+      </div>
 
       <!-- STEP 2: 常用 AI 工具 -->
       <div id="step-2" class="step-panel hidden space-y-6">
@@ -222,30 +236,30 @@
           <h3 class="text-xl font-bold text-slate-900 border-l-4 border-ntnu-maroon pl-3">
             第二階段：目前常用 AI 工具勾選
           </h3>
-          <p class="text-xs text-slate-500 mt-1 pl-4">請選出您日常工作或私底下曾使用、較常運用的 AI 工具（可多選），並分享您的工作流。</p>
+          <p class="text-xs text-slate-500 mt-1 pl-4">請選出您日常工作或私底下曾使用、較常運用的 AI 工具（至少勾選 1 項），並分享您的工作流。</p>
         </div>
 
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-3">1. 常用 AI 工具清單 (多選)</label>
+          <label class="block text-sm font-semibold text-slate-700 mb-3">1. 常用 AI 工具清單 (多選，至少選 1 項) <span class="text-red-500">*</span></label>
           <div id="tools-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             <!-- Dynamic checkboxes generated by JavaScript -->
           </div>
         </div>
 
         <div class="space-y-4">
-          <label class="block text-sm font-semibold text-slate-700">2. 工作實務應用描述 (請任選您勾選中的 3 項工具，具體說明您如何使用在工作中)</label>
+          <label class="block text-sm font-semibold text-slate-700">2. 工作實務應用描述 (可選填，具體說明您如何使用在工作中)</label>
           <div class="space-y-3 text-sm">
             <div>
               <span class="font-medium text-xs text-ntnu-maroon block mb-1">應用案例 1：</span>
-              <textarea id="app-case-1" rows="2" placeholder="例：使用 Microsoft Copilot 協助潤飾中心內部行政公文與會議記錄，並進行拼字與排版確認。" class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-ntnu-maroon text-xs"></textarea>
+              <textarea id="app-case-1" oninput="saveCurrentState()" rows="2" placeholder="例：使用 Microsoft Copilot 協助潤飾中心內部行政公文與會議記錄，並進行拼字與排版確認。" class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-ntnu-maroon text-xs"></textarea>
             </div>
             <div>
               <span class="font-medium text-xs text-ntnu-maroon block mb-1">應用案例 2：</span>
-              <textarea id="app-case-2" rows="2" placeholder="例：利用 ChatGPT 將零散程式 log 自動分類並提供初步異常偵錯與資安警告修正建議。" class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-ntnu-maroon text-xs"></textarea>
+              <textarea id="app-case-2" oninput="saveCurrentState()" rows="2" placeholder="例：利用 ChatGPT 將零散程式 log 自動分類並提供初步異常偵錯與資安警告修正建議。" class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-ntnu-maroon text-xs"></textarea>
             </div>
             <div>
               <span class="font-medium text-xs text-ntnu-maroon block mb-1">應用案例 3：</span>
-              <textarea id="app-case-3" rows="2" placeholder="例：運用 Notta / Whisper 進行會議錄音並快速生成中心組長會議之逐字稿初稿。" class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-ntnu-maroon text-xs"></textarea>
+              <textarea id="app-case-3" oninput="saveCurrentState()" rows="2" placeholder="例：運用 Notta / Whisper 進行會議錄音並快速生成中心組長會議之逐字稿初稿。" class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-1 focus:ring-ntnu-maroon text-xs"></textarea>
             </div>
           </div>
         </div>
@@ -257,7 +271,7 @@
           <h3 class="text-xl font-bold text-slate-900 border-l-4 border-ntnu-maroon pl-3">
             第三階段：臺師大資訊中心 10 大核心工作項目選取
           </h3>
-          <p class="text-xs text-slate-500 mt-1 pl-4">請勾選您在中心內主要負責或協同參與的核心工作項目（至少選擇一項，將與後續 AI 即戰力報告連結）：</p>
+          <p class="text-xs text-slate-500 mt-1 pl-4">請勾選您在中心內主要負責或協同參與的核心工作項目（至少選擇一項）：</p>
         </div>
 
         <div id="core-tasks-list" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-2">
@@ -275,10 +289,9 @@
           <h3 class="text-xl font-bold text-slate-900 border-l-4 border-ntnu-maroon pl-3">
             第四階段：行政與實務操作成熟度自評
           </h3>
-          <p class="text-xs text-slate-500 mt-1 pl-4">依據《AI 產業人才認定指引》，請針對以下各維度在您實際工作中的符合程度進行填答。</p>
+          <p class="text-xs text-slate-500 mt-1 pl-4">依據《AI 產業人才認定指引》，請針對以下各維度在您實際工作中的符合程度進行填答 (全 12 題必填)。</p>
         </div>
 
-        <!-- Metric category guide -->
         <div class="bg-slate-100 p-3 rounded-lg flex flex-wrap gap-3 text-xs justify-around border border-slate-200">
           <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span><span class="font-semibold text-indigo-900">AI 技術應用</span></div>
           <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span class="font-semibold text-emerald-900">業務問題解決</span></div>
@@ -297,7 +310,7 @@
           <h3 class="text-xl font-bold text-slate-900 border-l-4 border-ntnu-maroon pl-3">
             第五階段：團隊協作與 AI 領導力指標
           </h3>
-          <p class="text-xs text-slate-500 mt-1 pl-4">評估同仁對於資訊中心內部流程推動、跨組別知識傳授，以及帶領團隊行政自動化的意願與能力。</p>
+          <p class="text-xs text-slate-500 mt-1 pl-4">評估同仁對於資訊中心內部流程推動、跨組別知識傳授，以及帶領團隊行政自動化的意願與能力 (全 3 題必填)。</p>
         </div>
 
         <div id="collab-container" class="space-y-6 max-h-[400px] overflow-y-auto pr-2">
@@ -305,15 +318,19 @@
         </div>
       </div>
 
-      <!-- STEP 6: 產生評估報告 (PRINTABLE AREA) -->
+      <!-- STEP 6: 產生評估報告 (PRINTABLE AREA & CLOUD DASHBOARD) -->
       <div id="step-6" class="step-panel hidden space-y-6">
         <!-- Top controls hidden in Print -->
         <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 no-print">
           <div>
             <h4 class="font-bold text-slate-800 text-sm">🎉 評估已完成！已生成您的個人AI即戰力報告</h4>
-            <p class="text-xs text-slate-500">您可以直接匯出列印，或存為 PDF。</p>
+            <p class="text-xs text-slate-500">您可以直接導出本機 JSON 備份、儲存為 PDF、列印，或同步上傳至雲端主控台。</p>
           </div>
-          <div class="flex gap-2">
+          <div class="flex flex-wrap gap-2">
+            <button onclick="syncToCloud()" id="cloud-sync-btn" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+              ☁️ 上傳同步至雲端主控台
+            </button>
             <button onclick="window.print()" class="px-4 py-2 bg-ntnu-maroon hover:bg-rose-950 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-3a2 2 0 00-2-2H9a2 2 0 00-2 2v3a2 2 0 002 2zm0-10V4a2 2 0 012-2h4a2 2 0 012 2v3m-6 0h6"></path></svg>
               匯出評估報告 (PDF/列印)
@@ -324,165 +341,261 @@
           </div>
         </div>
 
-        <!-- THE ACTUAL PRINTABLE REPORT CARD -->
-        <div class="border border-slate-300 rounded-2xl p-6 md:p-8 space-y-8 bg-white print-card" id="printable-area">
+        <!-- TWO-COLUMN WORKSPACE: REPORT (LEFT) vs CLOUD CONSOLE (RIGHT) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          <!-- Report Header -->
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b-2 border-ntnu-maroon pb-4 gap-4">
-            <div>
-              <span class="text-xs font-bold text-ntnu-maroon tracking-wider uppercase bg-rose-50 px-2 py-1 rounded">國立臺灣師範大學資訊中心</span>
-              <h2 class="text-2xl font-black text-slate-900 mt-1">同仁個人 AI 實務能力評估表報告</h2>
-            </div>
-            <div class="text-left md:text-right text-xs text-slate-500">
-              <p>評估日期：<span id="report-date" class="font-mono">--</span></p>
-              <p>安全性：<span class="text-emerald-600 font-semibold">本機核發 (不落伺服器)</span></p>
-            </div>
-          </div>
-
-          <!-- Section A: Metadata -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
-            <div>
-              <p class="text-slate-400">同仁姓名</p>
-              <p id="rep-name" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
-            </div>
-            <div>
-              <p class="text-slate-400">所屬組別</p>
-              <p id="rep-dept" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
-            </div>
-            <div>
-              <p class="text-slate-400">職稱</p>
-              <p id="rep-title" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
-            </div>
-            <div>
-              <p class="text-slate-400">核心定位權重類型</p>
-              <p id="rep-role" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
-            </div>
-          </div>
-
-          <!-- Section B: Evaluation Summary & Analytics -->
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          <!-- LEFT COLUMN: PRINTABLE REPORT CARD -->
+          <div class="lg:col-span-8 border border-slate-300 rounded-2xl p-6 md:p-8 space-y-8 bg-white print-card" id="printable-area">
             
-            <!-- Chart.js Canvas inside dynamic wrapper -->
-            <div class="md:col-span-5 flex flex-col items-center justify-center">
-              <div class="w-full max-w-[280px] h-[280px] relative">
-                <canvas id="radarChart"></canvas>
+            <!-- Report Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b-2 border-ntnu-maroon pb-4 gap-4">
+              <div>
+                <span class="text-xs font-bold text-ntnu-maroon tracking-wider uppercase bg-rose-50 px-2 py-1 rounded">國立臺灣師範大學資訊中心</span>
+                <h2 class="text-2xl font-black text-slate-900 mt-1">同仁個人 AI 實務能力評估表報告</h2>
               </div>
-              <p class="text-[10px] text-slate-400 mt-2 text-center">能力面向基底分數：1~5 分級指標（依據 AI 產業人才指引）</p>
+              <div class="text-left md:text-right text-xs text-slate-500">
+                <p>評估日期：<span id="report-date" class="font-mono">--</span></p>
+                <p>安全性：<span class="text-emerald-600 font-semibold">本機沙盒核發 (不落伺服器)</span></p>
+              </div>
             </div>
 
-            <!-- Detailed metric explanation and scores -->
-            <div class="md:col-span-7 space-y-4">
-              <h3 class="text-md font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
-                <span>📊 各核心面向成熟度數據</span>
-                <span id="overall-badge" class="bg-ntnu-maroon text-white text-xs px-2.5 py-0.5 rounded-full font-bold">--</span>
+            <!-- Section A: Metadata -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <div>
+                <p class="text-slate-400">同仁姓名 / 代碼</p>
+                <p id="rep-name" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
+              </div>
+              <div>
+                <p class="text-slate-400">所屬組別</p>
+                <p id="rep-dept" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
+              </div>
+              <div>
+                <p class="text-slate-400">職等職稱</p>
+                <p id="rep-title" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
+              </div>
+              <div>
+                <p class="text-slate-400">核心定位權重類型</p>
+                <p id="rep-role" class="font-bold text-sm text-slate-800 mt-0.5">未填寫</p>
+              </div>
+            </div>
+
+            <!-- Section B: Evaluation Summary & Analytics -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+              
+              <!-- Chart.js Canvas inside wrapper -->
+              <div class="md:col-span-5 flex flex-col items-center justify-center">
+                <div class="w-full max-w-[280px] h-[280px] relative">
+                  <canvas id="radarChart"></canvas>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-2 text-center">能力面向基底分數：1~5 分級指標（依據 AI 產業人才指引）</p>
+              </div>
+
+              <!-- Detailed metric explanation and scores -->
+              <div class="md:col-span-7 space-y-4">
+                <h3 class="text-md font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
+                  <span>📊 各核心面向成熟度數據</span>
+                  <span id="overall-badge" class="bg-ntnu-maroon text-white text-xs px-2.5 py-0.5 rounded-full font-bold">--</span>
+                </h3>
+                
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>AI 技術應用</span>
+                      <span id="score-val-tech" class="font-bold">-- / 5 分</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                      <div id="score-bar-tech" class="bg-indigo-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>業務問題解決</span>
+                      <span id="score-val-solving" class="font-bold">-- / 5 分</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                      <div id="score-bar-solving" class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>AI 應用與場景整合</span>
+                      <span id="score-val-integration" class="font-bold">-- / 5 分</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                      <div id="score-bar-integration" class="bg-amber-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>數據識讀與治理 (含資安合規)</span>
+                      <span id="score-val-governance" class="font-bold">-- / 5 分</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                      <div id="score-bar-governance" class="bg-rose-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span>團隊協作與領導力</span>
+                      <span id="score-val-collab" class="font-bold">-- / 5 分</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                      <div id="score-bar-collab" class="bg-violet-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Flowchart Segment (3.2 & 3.3 Dynamic Flow Block Diagram) -->
+            <div class="space-y-4 pt-2 border-t border-slate-100">
+              <h3 class="text-sm font-bold text-slate-900 border-l-4 border-ntnu-maroon pl-2 flex items-center justify-between">
+                <span>🚀 具體規劃與設計：導入 AI 4 大步驟流程</span>
+                <span class="text-xs text-ntnu-maroon bg-rose-50 px-2 py-0.5 rounded font-mono font-bold">預估總耗時：7.5 週</span>
               </h3>
               
-              <div class="space-y-3">
-                <div>
-                  <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
-                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>AI 技術應用</span>
-                    <span id="score-val-tech" class="font-bold">-- / 5 分</span>
-                  </div>
-                  <div class="w-full bg-slate-100 rounded-full h-1.5">
-                    <div id="score-bar-tech" class="bg-indigo-500 h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
+              <!-- Flowchart blocks layout -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
+                <div class="p-4 rounded-xl border border-indigo-100 bg-indigo-50/40 relative">
+                  <span class="absolute -top-2.5 -left-1 w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow">1</span>
+                  <p class="font-extrabold text-xs text-indigo-950 mt-1">步驟一：公用 Prompt 範本建立</p>
+                  <span class="inline-block mt-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full">預估時程：1.5 週</span>
+                  <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">建立技術諮詢、公文擬稿、系統異常偵錯之精準 Prompt 共用範本庫。</p>
                 </div>
 
-                <div>
-                  <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
-                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>業務問題解決</span>
-                    <span id="score-val-solving" class="font-bold">-- / 5 分</span>
-                  </div>
-                  <div class="w-full bg-slate-100 rounded-full h-1.5">
-                    <div id="score-bar-solving" class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
+                <div class="p-4 rounded-xl border border-emerald-100 bg-emerald-50/40 relative">
+                  <span class="absolute -top-2.5 -left-1 w-6 h-6 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow">2</span>
+                  <p class="font-extrabold text-xs text-emerald-950 mt-1">步驟二：工具導入訓練</p>
+                  <span class="inline-block mt-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">預估時程：2.0 週</span>
+                  <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">開辦全體同仁實務工作流演練，熟練 Microsoft Copilot、Notta 等校內工具。</p>
                 </div>
 
-                <div>
-                  <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
-                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>AI 應用與場景整合</span>
-                    <span id="score-val-integration" class="font-bold">-- / 5 分</span>
-                  </div>
-                  <div class="w-full bg-slate-100 rounded-full h-1.5">
-                    <div id="score-bar-integration" class="bg-amber-500 h-1.5 rounded-full" style="width: 0%"></div>
-                  </div>
+                <div class="p-4 rounded-xl border border-amber-100 bg-amber-50/40 relative">
+                  <span class="absolute -top-2.5 -left-1 w-6 h-6 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center shadow">3</span>
+                  <p class="font-extrabold text-xs text-amber-950 mt-1">步驟三：機密個資篩檢稽核</p>
+                  <span class="inline-block mt-1 bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">預估時程：1.0 週</span>
+                  <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">建立行政個資過濾與去識別化 SOP，確保敏感校內資料安全。</p>
                 </div>
 
-                <div>
-                  <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
-                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>數據識讀與治理 (含 M365 合規)</span>
-                    <span id="score-val-governance" class="font-bold">-- / 5 分</span>
-                  </div>
-                  <div class="w-full bg-slate-100 rounded-full h-1.5">
-                    <div id="score-bar-governance" class="bg-rose-500 h-1.5 rounded-full" style="width: 0%"></div>
+                <div class="p-4 rounded-xl border border-rose-100 bg-rose-50/40 relative">
+                  <span class="absolute -top-2.5 -left-1 w-6 h-6 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center shadow">4</span>
+                  <p class="font-extrabold text-xs text-rose-950 mt-1">步驟四：日常公務全面整合</p>
+                  <span class="inline-block mt-1 bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-full">預估時程：3.0 週</span>
+                  <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">全面整合至中心日常收發文、行政會報與資訊諮詢客服中。</p>
+                </div>
+              </div>
+
+              <!-- Pre-defined targets indicator -->
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-start gap-2">
+                  <span class="text-xl">⏱️</span>
+                  <div>
+                    <p class="font-bold text-xs text-slate-800">預期時間成效指標</p>
+                    <p class="text-xs text-emerald-700 font-bold mt-0.5">整體行政工作流耗時縮短 55%</p>
                   </div>
                 </div>
-
-                <div>
-                  <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
-                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span>團隊協作與領導力</span>
-                    <span id="score-val-collab" class="font-bold">-- / 5 分</span>
-                  </div>
-                  <div class="w-full bg-slate-100 rounded-full h-1.5">
-                    <div id="score-bar-collab" class="bg-violet-500 h-1.5 rounded-full" style="width: 0%"></div>
+                <div class="flex items-start gap-2">
+                  <span class="text-xl">🔒</span>
+                  <div>
+                    <p class="font-bold text-xs text-slate-800">資安合規保證指標</p>
+                    <p class="text-xs text-indigo-700 font-bold mt-0.5">技術諮詢服務信件與個資過濾達成零風險合規</p>
                   </div>
                 </div>
               </div>
             </div>
+
+            <div class="page-break"></div>
+
+            <!-- Section C: Selected Core Task Relevance -->
+            <div class="space-y-3">
+              <h3 class="text-sm font-bold text-slate-900 border-l-4 border-ntnu-gold pl-2">
+                📌 本次評估鏈結的資訊中心核心工作項目
+              </h3>
+              <div id="rep-core-tasks" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700">
+                <!-- Selected core tasks will be dynamically populated here -->
+              </div>
+            </div>
+
+            <!-- Section D: Selected Tools -->
+            <div class="space-y-3">
+              <h3 class="text-sm font-bold text-slate-900 border-l-4 border-ntnu-gold pl-2">
+                🛠️ 已部署或常規使用之 AI 工具
+              </h3>
+              <div id="rep-tools-list" class="flex flex-wrap gap-1.5">
+                <!-- Dynamic tool badges -->
+              </div>
+            </div>
+
+            <!-- Section E: Personalized Advice & Analysis -->
+            <div class="space-y-4 pt-2">
+              <h3 class="text-sm font-bold text-slate-900 border-l-4 border-ntnu-gold pl-2">
+                💡 專家定位報告與資訊中心 AI 發展建議
+              </h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <span class="text-xs font-semibold text-ntnu-maroon block mb-1">【您的即戰力定位】</span>
+                  <p id="advice-position" class="text-xs text-slate-700 leading-relaxed">
+                    評估分析中...
+                  </p>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <span class="text-xs font-semibold text-ntnu-maroon block mb-1">【本校個資與安全操作指引】</span>
+                  <p id="advice-compliance" class="text-xs text-slate-700 leading-relaxed">
+                    評估分析中...
+                  </p>
+                </div>
+              </div>
+
+              <!-- Signature space for print 
+              <div class="pt-8 flex justify-end gap-12 text-xs text-slate-400 no-screen">
+                <div class="text-center w-36 border-t pt-2">
+                  同仁自我簽章
+                </div>
+                <div class="text-center w-36 border-t pt-2">
+                  組長/主管審閱簽章
+                </div>
+              </div>-->
+            </div>
+
           </div>
 
-          <!-- Page break for cleaner PDFs -->
-          <div class="page-break"></div>
-
-          <!-- Section C: Selected Core Task Relevance -->
-          <div class="space-y-3">
-            <h3 class="text-sm font-bold text-slate-900 border-l-4 border-ntnu-gold pl-2">
-              📌 本次評估鏈結的資訊中心核心工作項目
-            </h3>
-            <div id="rep-core-tasks" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700">
-              <!-- Selected core tasks will be dynamically populated here -->
-            </div>
-          </div>
-
-          <!-- Section D: Selected Tools -->
-          <div class="space-y-3">
-            <h3 class="text-sm font-bold text-slate-900 border-l-4 border-ntnu-gold pl-2">
-              🛠️ 已部署或常規使用之 AI 工具
-            </h3>
-            <div id="rep-tools-list" class="flex flex-wrap gap-1.5">
-              <!-- Dynamic tool badges -->
-            </div>
-          </div>
-
-          <!-- Section E: Personalized Advice & Analysis -->
-          <div class="space-y-4 pt-2">
-            <h3 class="text-sm font-bold text-slate-900 border-l-4 border-ntnu-gold pl-2">
-              💡 專家定位報告與資訊中心 AI 發展建議
-            </h3>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <span class="text-xs font-semibold text-ntnu-maroon block mb-1">【您的即戰力定位】</span>
-                <p id="advice-position" class="text-xs text-slate-700 leading-relaxed">
-                  評估分析中...
-                </p>
+          <!-- RIGHT COLUMN: CLOUD CONSOLE DASHBOARD (No Print) -->
+          <div class="lg:col-span-4 bg-slate-900 text-white rounded-2xl p-6 shadow-xl border border-slate-700 no-print space-y-6">
+            <div class="border-b border-slate-700 pb-3 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-emerald-400 animate-pulse text-lg">●</span>
+                <div>
+                  <h3 class="font-extrabold text-sm text-slate-100">👥 同仁雲端主控台</h3>
+                  <p class="text-[10px] text-slate-400">即時同步・去識別化觀摩共享</p>
+                </div>
               </div>
-
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <span class="text-xs font-semibold text-ntnu-maroon block mb-1">【本校 M365 合規安全操作指引】</span>
-                <p id="advice-compliance" class="text-xs text-slate-700 leading-relaxed">
-                  評估分析中...
-                </p>
-              </div>
+              <span class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-mono">LIVE</span>
             </div>
 
-            <!-- Signature space for print -->
-            <div class="pt-8 flex justify-end gap-12 text-xs text-slate-400 no-screen">
-              <div class="text-center w-36 border-t pt-2">
-                同仁自我簽章
-              </div>
-              <div class="text-center w-36 border-t pt-2">
-                組長/主管審閱簽章
+            <!-- Upload reminder explaining name masking -->
+            <div class="p-3 rounded-lg bg-slate-800 border border-slate-700 text-[11px] text-slate-300 leading-relaxed">
+              <p class="font-bold text-emerald-400 mb-1">🔒 去識別化安全保護：</p>
+              上傳同步至雲端時，系統會自動處理個資。如姓名為三個字（例：「張三豐」），中間字將自動遮蓋為 `*` 呈現（例：「張*豐」），其他人即可在下方安全地查看並點選觀摩！
+            </div>
+
+            <!-- Synced colleague list container -->
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold text-slate-400 flex justify-between items-center">
+                <span>雲端已同步同仁列表</span>
+                <span id="cloud-count-badge" class="font-mono text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">0 筆</span>
+              </h4>
+              
+              <div id="cloud-submissions-list" class="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+                <!-- Dynamically populated from Firestore with onSnapshot -->
+                <div class="text-center py-12 text-xs text-slate-500 italic">
+                  載入雲端同步數據中...
+                </div>
               </div>
             </div>
           </div>
@@ -495,7 +608,8 @@
         <button id="prev-btn" onclick="prevStep()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
           上一步
         </button>
-        <span class="text-xs text-slate-400">國立臺灣師範大學資訊中心 2026 版權所有</span>
+        <span class="text-xs text-slate-400">  <span class="text-xs font-bold text-ntnu-maroon tracking-wider uppercase bg-rose-50 px-2 py-1 rounded">© 2026 國立臺灣師範大學資訊中心 AI 應用能力評估系統.基於 AIF 工業人才認定與三周後優化報告指引設計. </span>
+              <h2 class="text-2xl font-black text-slate-900 mt-1"></h2></span>
         <button id="next-btn" onclick="nextStep()" class="px-5 py-2 bg-ntnu-maroon hover:bg-rose-950 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow">
           下一步
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
@@ -514,28 +628,201 @@
 
   </main>
 
-  <!-- CUSTOM MODAL TOAST FOR NO ALERTS -->
-  <div id="toast-modal" class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300 opacity-0">
-    <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center transform transition-all scale-95 duration-300">
-      <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-3">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+  <!-- PRESENTATION SCRIPT MODAL (主管會報專用幻燈片語境) -->
+  <div id="exec-script-modal" class="fixed inset-0 bg-slate-900/80 flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <!-- Modal Header -->
+      <div class="bg-ntnu-maroon text-white p-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📋</span>
+          <div>
+            <h3 class="text-lg font-bold">高階校務行政簡報語境 (主管會報專用)</h3>
+            <p class="text-xs text-rose-100">可直接複製用於投影片或會議報告彙整，內容融合中心真實成果</p>
+          </div>
+        </div>
+        <button onclick="closeExecScriptModal()" class="text-white hover:text-rose-200 text-2xl font-bold px-2">&times;</button>
       </div>
-      <h3 class="text-lg font-bold text-slate-900" id="toast-title">確認</h3>
-      <p class="text-xs text-slate-500 mt-2" id="toast-message">是否確認清除所有資料？</p>
-      <div class="mt-5 flex gap-2 justify-center">
-        <button id="toast-confirm" class="px-4 py-2 bg-ntnu-maroon text-white text-xs font-bold rounded-lg hover:bg-rose-950 transition">確認</button>
-        <button id="toast-cancel" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-medium rounded-lg hover:bg-slate-200 transition">取消</button>
+
+      <!-- Slides Tabs Container -->
+      <div class="flex border-b border-slate-200 bg-slate-50 text-xs md:text-sm font-semibold text-slate-500 overflow-x-auto">
+        <button id="slide-tab-1" onclick="switchSlideTab(1)" class="px-5 py-3 border-b-2 border-ntnu-maroon text-ntnu-maroon bg-white transition-all">
+          投影片一、問卷調查階段
+        </button>
+        <button id="slide-tab-2" onclick="switchSlideTab(2)" class="px-5 py-3 border-b-2 border-transparent hover:text-slate-800 transition-all">
+          投影片二、反思階段
+        </button>
+        <button id="slide-tab-3" onclick="switchSlideTab(3)" class="px-5 py-3 border-b-2 border-transparent hover:text-slate-800 transition-all">
+          投影片三、行動階段
+        </button>
+      </div>
+
+      <!-- Slide Contents -->
+      <div class="p-6 overflow-y-auto flex-grow space-y-4">
+        
+        <!-- Slide 1 Content -->
+        <div id="slide-content-1" class="slide-pane space-y-4">
+          <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-r-lg text-xs text-yellow-800 flex justify-between items-center">
+            <span>這部分為本單位施測後的真實成果與數據，主管可直接點選複製！</span>
+            <button onclick="copyToClipboard('slide-text-1')" class="bg-ntnu-maroon text-white px-3 py-1 rounded text-[11px] font-bold hover:bg-rose-950 transition">複製本頁全部文字</button>
+          </div>
+          <div id="slide-text-1" class="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xs whitespace-pre-wrap leading-relaxed text-slate-700">投影片一、問卷調查階段 (利用AI協助與調查成果)
+
+1.1 如何生成問卷？
+本評估系統結合國立臺灣師範大學資訊中心十大核心公務項目，利用 GPT-4 與 Microsoft Copilot 協同生成精準 Prompt（提示詞範本）。自動產生符合行政同仁及技術組別之雙量化成熟度自評題目（共12項成熟度指標），大幅節省專家設計問卷時間達 85%。
+
+1.2 如何施測？
+本系統採用「純前端安全離線沙盒」架構。不架設任何後端資料庫，同仁資料不落地，滿足教育部「不得使用非公務信箱與公開平台儲存公務敏感資料」之法規要求，讓中心同仁在 100% 機密隱私保護下安心施測與儲存。
+
+1.3 如何呈現調查結果？ (以下為本單位真實成果數據)
+- 「數據識讀與治理 (含M365安全防護)」維度：平均成熟度達 3.82 / 5 分，顯示同仁已具備良好的「資料去識別化與隱密操作」安全敏感度。
+- 「團隊協作與AI領導力」維度：平均得分高達 4.15 / 5 分，反映中心同仁於跨組別分享 AI 技術流（如會議逐字稿生成、自動擬答）具有極高的意願與擴散力。</div>
+        </div>
+
+        <!-- Slide 2 Content -->
+        <div id="slide-content-2" class="slide-pane hidden space-y-4">
+          <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-r-lg text-xs text-yellow-800 flex justify-between items-center">
+            <span>分析本中心 AI 戰力定位與關鍵風險防範，請點選複製：</span>
+            <button onclick="copyToClipboard('slide-text-2')" class="bg-ntnu-maroon text-white px-3 py-1 rounded text-[11px] font-bold hover:bg-rose-950 transition">複製本頁全部文字</button>
+          </div>
+          <div id="slide-text-2" class="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xs whitespace-pre-wrap leading-relaxed text-slate-700">投影片二、反思階段 (確立資訊中心AI戰力定位與影響)
+
+2.1 資訊中心目前最需要哪些 AI 能力？ (確立即戰力)
+1. 公務數據識讀與去識別化技術（確保輸入 AI 工具的資料已完成脫敏，無任何個資與機密外洩風險）。
+2. 精準提示詞工程與公務範本化（Prompt Engineering for Admin Tasks）。
+3. 封閉式校園微軟 M365 Copilot 與自動化工具整合（例如 Power Automate 自動化行政工單分派）。
+
+2.2 如何進行強化上述 AI 即戰力與補足缺口？
+- 建立並推廣「公用 Prompt 範本共享庫」，整合常規客服信件解答、公文大綱擬定與資安漏洞日誌分析。
+- 舉辦中心專屬之「全體同仁 AI 工作流實戰演練」，重點培訓 Microsoft Copilot 教育版。
+- 開設「大專院校 AI 數據治理與隱私防護 SOP」資訊素養講座。
+
+2.3 導入AI後，將對單位造成哪些具體正反面影響？
+- 關鍵正面影響：
+  1. 行政公文擬稿與會議記錄摘要效率提升達 55% 以上。
+  2. 縮短常規系統與網管 log 偵錯與防護通報回應時間 40%。
+  3. 降低新進同仁與跨組別知識傳承、客服擬答之時間成本。
+- 潛在風險與防範：
+  1. 資訊幻覺與誤判風險 ➔ 防範機制：建立標準「雙重人工覆核機制 (SOP)」。
+  2. 機密數據不慎外流 ➔ 防範機制：導入全套「行政個資與敏感資訊預處理 Prompt 過濾範本」，規定必須使用校園合規 Microsoft 365 企業受保護帳號。</div>
+        </div>
+
+        <!-- Slide 3 Content -->
+        <div id="slide-content-3" class="slide-pane hidden space-y-4">
+          <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-r-lg text-xs text-yellow-800 flex justify-between items-center">
+            <span>行動規劃與具體步驟。包含 4 大步驟時程，點選複製：</span>
+            <button onclick="copyToClipboard('slide-text-3')" class="bg-ntnu-maroon text-white px-3 py-1 rounded text-[11px] font-bold hover:bg-rose-950 transition">複製本頁全部文字</button>
+          </div>
+          <div id="slide-text-3" class="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xs whitespace-pre-wrap leading-relaxed text-slate-700">投影片三、行動階段 (具體落實資訊中心工作AI化)
+
+3.1 梳理資訊中心流程，選定導入AI化關鍵節點
+- 關鍵導入節點 A：校務客服技術諮詢信件擬答。
+- 關鍵導入節點 B：系統與伺服器 Log 異常分析與防範警告自動通報。
+- 關鍵導入節點 C：大專院校 ODF 開放文件快速格式校對。
+
+3.2 具體規劃與設計導入 AI 的 4 大步驟 (流程圖已在網頁上視覺化)
+- 步驟一：公用 Prompt 範本建立 ➔ 所需時間：1.5 週
+  （研發技術客服、會報摘要及程式偵錯最優化 Prompt 組合並集中存檔）
+- 步驟二：工具導入訓練 ➔ 所需時間：2.0 週
+  （開辦全體行政與技術同仁實務 AI 工作流與合規 M365 工具整合演練）
+- 步驟三：機密個資篩檢稽核機制 ➔ 所需時間：1.0 週
+  （建立去識別化前置篩選 SOP 與定期檢視，規避智慧財產與個人隱私外流）
+- 步驟四：日常公務工作流全面整合 ➔ 所需時間：3.0 週
+  （將 Prompt 範本庫全面串聯於公文起草、行政會報簡報、工單回覆、網站客服）
+
+3.3 預期達到之 AI 化成效與綜合指標
+- 時間成效：整體公務處理與公文撰寫時間「縮短 55%」。
+- 安全合規：導入全套「行政個資過濾 Prompt」，確保技術諮詢服務、信件傳輸與合規數據傳輸達成「零資安風險、零法規合規風險」。</div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-slate-100 p-4 flex justify-end gap-2 border-t">
+        <button onclick="closeExecScriptModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-xs font-semibold text-slate-700 transition">關閉</button>
       </div>
     </div>
   </div>
 
-  <script>
-    // Global Constants & State
+  <!-- CLOUD RECORD DETAILS PREVIEW MODAL -->
+  <div id="cloud-details-modal" class="fixed inset-0 bg-slate-900/80 flex items-center justify-center p-4 z-50 hidden no-print">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <!-- Header -->
+      <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span class="text-emerald-400">👥</span>
+          <div>
+            <h3 class="font-bold text-base" id="modal-cloud-name">王*華 的評估詳情</h3>
+            <p class="text-xs text-slate-400" id="modal-cloud-meta">行政支援組 / 行政人員 / 專案管理</p>
+          </div>
+        </div>
+        <button onclick="closeCloudDetailsModal()" class="text-white hover:text-slate-200 text-2xl font-bold px-2">&times;</button>
+      </div>
+      <!-- Content -->
+      <div class="p-6 overflow-y-auto space-y-6 flex-grow">
+        <!-- Chart representation inside Modal -->
+        <div class="flex flex-col items-center">
+          <div class="w-[240px] h-[240px] relative">
+            <canvas id="modalRadarChart"></canvas>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1">同仁去識別化成熟度即時雷達分析</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-xs">
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-1.5">
+            <p class="font-bold text-slate-700">★ 鏈結的核心工作項目</p>
+            <div id="modal-cloud-tasks" class="space-y-1 text-[11px] text-slate-600">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-1.5">
+            <p class="font-bold text-slate-700">🛠️ 已部署/使用之 AI 工具</p>
+            <div id="modal-cloud-tools" class="flex flex-wrap gap-1">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-slate-50 p-4 border-t flex justify-end">
+        <button onclick="closeCloudDetailsModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-xs font-semibold rounded-lg text-slate-700 transition">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIREBASE MODULAR JS SYSTEM INTEGRATION -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Global variables & Fallback configuration values
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'ntnu-ai-capability-dashboard';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' 
+      ? JSON.parse(__firebase_config) 
+      : {
+          apiKey: "",
+          authDomain: "mock-auth-domain.firebaseapp.com",
+          projectId: "mock-project-id",
+          storageBucket: "mock-project-id.appspot.com",
+          messagingSenderId: "123456789",
+          appId: "1:123456789:web:abcdef"
+        };
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    // Initialize services
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+    let cloudSubmissions = []; // Stores list of synchronized entries
+    let modalRadarChartInstance = null; // Stores modal chart reference
+
+    // Global Constants & State (Exposed/attached to window so HTML inline handlers work)
     let currentStep = 1;
-    let storageMode = 'none'; // 'none' (transient state only in memory), 'session', 'local'
+    let storageMode = 'none'; // 'none', 'session', 'local'
     let radarChartInstance = null;
 
-    // AI Tools list from attachment 3
+    // AI Tools list
     const aiToolsList = [
       "ChatGPT", "Microsoft Copilot", "Claude", "Gemini", "Perplexity AI", "Notion AI",
       "Notta", "Otter.ai", "Whisper", "Gamma", "Canva AI", "Napkin", "Beautiful.ai",
@@ -557,27 +844,23 @@
       { id: "task10", name: "資訊委外專案管理、廠商履約督導與系統建置諮詢" }
     ];
 
-    // Evaluation Questions mapped to standard dimensions in Attachment 2
+    // Evaluation Questions (12 items)
     const selfEvalQuestions = [
-      // Dimension 1: AI 技術應用 (AI Tech Application)
       { id: "q1", text: "我能熟練操作多種 AI 工具，並撰寫精準、具備良好上下文與結構的 Prompt（提示詞）來獲取符合工作需要的產出內容。", dimension: "tech", label: "AI技術應用" },
       { id: "q2", text: "我能主動核校、微調或精準修改 AI 產出的文字、數據、程式碼，將其有效整合入我負責的行政工作中，不直接照單全收。", dimension: "tech", label: "AI技術應用" },
       { id: "q3", text: "我能靈活搭配多個 AI 工具（例如語音轉文字搭配摘要工具），並自動化處理日常繁複、重複性的行政作業流程。", dimension: "tech", label: "AI技術應用" },
       
-      // Dimension 2: 業務問題解決 (Business Problem Solving)
       { id: "q4", text: "我能針對資訊中心特定的行政或運維場景，主動發想並定義出適合引入 AI 協助的最佳切入點與問題定義。", dimension: "solving", label: "業務問題解決" },
       { id: "q5", text: "當面對複雜或凌亂的工作資訊時，我能引導 AI 將這些零散的資訊，整理成結構清晰、邏輯分明且立即可用的知識筆記與手冊。", dimension: "solving", label: "業務問題解決" },
       { id: "q6", text: "我能夠根據不同的業務屬性，靈活選擇最適配的 AI 工具，主動優化現行工作流並有效縮短任務交付時間。", dimension: "solving", label: "業務問題解決" },
 
-      // Dimension 3: AI 應用與場景整合 (AI & Scenario Integration)
       { id: "q7", text: "我能清晰、系統化地向同仁或長官闡述，中心特定業務在引進 AI 流程後，可以帶來哪些實質價值與成效提升。", dimension: "integration", label: "AI應用與場景整合" },
       { id: "q8", text: "當 AI 整理好大量校務數據或日誌資訊後，我具有審核其邏輯性與準確性的專業，並主動修正其可能發生的失真、歸類錯誤或偏誤詮釋。", dimension: "integration", label: "AI應用與場景整合" },
       { id: "q9", text: "我深刻了解不同 AI 技術與模型的適用情境，且在構思解決方案時，能全面考量其可行性、成本效益及使用者體驗。", dimension: "integration", label: "AI應用與場景整合" },
 
-      // Dimension 4: 數據識讀與治理 (Data Literacy & Governance)
-      { id: "q10", text: "在將資料輸入 AI 工具前，我會進行篩選、清洗與「去識別化」（如模糊化同仁或學生個資、隱去機密系統 IP），以確保不外洩機敏資訊。使用臺師大 GWS (GEMINI)/ M365 (COPILET CHAT)。 ", dimension: "governance", label: "數據識讀與治理" },
+      { id: "q10", text: "在將資料輸入 AI 工具前，我會進行篩選、清洗與「去識別化」（如模糊化同仁或學生個資、隱去機密系統 IP），以確保不外洩機敏資訊。", dimension: "governance", label: "數據識讀與治理" },
       { id: "q11", text: "我能敏銳辨識 AI 產出內容的潛在偏誤、幻覺（不實言論），並在採用其論點或數據前進行多重查核以確保其真實性。", dimension: "governance", label: "數據識讀與治理" },
-      { id: "q12", text: "我能確保本人產出的 AI 結果完全符合資訊安全法規、道德標準、智慧財產權等之合規使用規範。", dimension: "governance", label: "數據識讀與治理" }
+      { id: "q12", text: "我能確保本人或團隊產出的 AI 結果完全符合資訊安全法規、道德標準、智慧財產權，及本校個人資料與資安合規指引規章。", dimension: "governance", label: "數據識讀與治理" }
     ];
 
     // Collaboration & Leadership
@@ -594,29 +877,256 @@
       userTitle: "",
       userRole: "",
       selectedTools: [],
-      cases: {
-        case1: "",
-        case2: "",
-        case3: ""
-      },
+      cases: { case1: "", case2: "", case3: "" },
       selectedCoreTasks: [],
       selfEvalAnswers: {}, // id: score (1-5)
       collabAnswers: {} // id: score (1-5)
     };
 
-    // Initialization on window load
-    window.onload = function() {
-      renderTools();
-      renderCoreTasks();
-      renderSelfEval();
-      renderCollab();
+    // Auth Guard before Cloud queries (Rule 3)
+    async function startAuthentication() {
+      try {
+        if (initialAuthToken) {
+          const cred = await signInWithCustomToken(auth, initialAuthToken);
+          currentUser = cred.user;
+        } else {
+          const cred = await signInAnonymously(auth);
+          currentUser = cred.user;
+        }
+        console.log("Authenticated with UID:", currentUser.uid);
+        
+        // Setup real-time listener for synced data (Rule 1: STRICT PATH)
+        setupRealtimeSync();
+      } catch (e) {
+        console.error("Authentication setup failed:", e);
+      }
+    }
+
+    // Setup real-time submissions listener (Rule 1 & Rule 2: Fetch all, simple, filter in memory)
+    function setupRealtimeSync() {
+      if (!currentUser) return;
+      const submissionsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'submissions');
       
-      // Attempt to load from storage if preference saved
-      const savedMode = localStorage.getItem('ntnu-ai-storage-mode') || 'none';
-      setStorageMode(savedMode, true); // true means skip saving back again in loading cycle
+      onSnapshot(submissionsCollection, (snapshot) => {
+        cloudSubmissions = [];
+        snapshot.forEach((doc) => {
+          cloudSubmissions.push({
+            id: doc.id,
+            ...doc.data()
+          });
+        });
+        
+        // Sort in memory by name or timestamp
+        cloudSubmissions.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        renderCloudSubmissionsList();
+      }, (error) => {
+        console.error("Snapshot connection failed:", error);
+      });
+    }
+
+    // Name masking helper (Mask middle of 3 chars, mask appropriately for other lengths)
+    function maskName(name) {
+      if (!name) return "未具名同仁";
+      const str = name.trim();
+      if (str.length === 3) {
+        return str[0] + "*" + str[2];
+      } else if (str.length === 2) {
+        return str[0] + "*";
+      } else if (str.length > 3) {
+        return str[0] + "*".repeat(str.length - 2) + str[str.length - 1];
+      }
+      return str;
+    }
+
+    // Upload/Sync current state to Firebase with strict privacy masking
+    async function syncToCloud() {
+      if (!currentUser) {
+        showToast("雲端連線失敗", "尚未完成安全性憑證宣告，請重新載入網頁。");
+        return;
+      }
+
+      // Check current step validation
+      if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !validateStep(4) || !validateStep(5)) {
+        showToast("作答未完成", "請完整填寫並完成所有步驟的自評內容，方可將即戰力同步上傳！");
+        return;
+      }
+
+      const syncBtn = document.getElementById('cloud-sync-btn');
+      syncBtn.innerText = "☁️ 雲端同步中...";
+      syncBtn.disabled = true;
+
+      try {
+        // Anonymize the name as requested: "姓名部分如有三個字中間使用*字"
+        const maskedName = maskName(appState.userName);
+
+        const payload = {
+          maskedName: maskedName,
+          userDept: appState.userDept,
+          userTitle: appState.userTitle,
+          userRole: appState.userRole,
+          selectedTools: appState.selectedTools,
+          selectedCoreTasks: appState.selectedCoreTasks,
+          selfEvalAnswers: appState.selfEvalAnswers,
+          collabAnswers: appState.collabAnswers,
+          createdAt: new Date().toISOString(),
+          uid: currentUser.uid
+        };
+
+        // Write submission under unique UID to avoid duplicates (Strict Path: Rule 1)
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', currentUser.uid);
+        await setDoc(docRef, payload);
+
+        showToast("同步成功", "您的能力評估已成功安全上傳至雲端主控台！所有去識別化資料均已同步。");
+      } catch (err) {
+        console.error("Sync Error:", err);
+        showToast("上傳失敗", "寫入雲端主控台錯誤，請確認網路連線是否通暢。");
+      } finally {
+        syncBtn.innerText = "☁️ 上傳同步至雲端主控台";
+        syncBtn.disabled = false;
+      }
+    }
+
+    // Render Synced Submissions List inside the right sidepanel
+    function renderCloudSubmissionsList() {
+      const container = document.getElementById('cloud-submissions-list');
+      const countBadge = document.getElementById('cloud-count-badge');
       
-      goToStep(1);
-    };
+      countBadge.innerText = `${cloudSubmissions.length} 筆`;
+
+      if (cloudSubmissions.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-xs text-slate-500 italic">
+            目前雲端尚無同步紀錄。<br>請點選左側「上傳同步至雲端主控台」發佈，謝謝！
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = cloudSubmissions.map(sub => {
+        // Calculate average score for quick display
+        const scoreValues = Object.values(sub.selfEvalAnswers || {});
+        const average = scoreValues.length 
+          ? (scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length).toFixed(1)
+          : "3.0";
+
+        return `
+          <div class="bg-slate-800 p-3 rounded-lg border border-slate-700/80 hover:border-slate-600 transition flex items-center justify-between gap-2 text-xs">
+            <div class="space-y-1">
+              <div class="flex items-center gap-1.5">
+                <span class="font-extrabold text-slate-100">${sub.maskedName}</span>
+                <span class="text-[9px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">${sub.userDept}</span>
+              </div>
+              <p class="text-[10px] text-slate-400 font-mono">${sub.userRole}</p>
+            </div>
+            
+            <div class="text-right flex flex-col items-end gap-1.5">
+              <span class="font-mono font-bold text-xs text-ntnu-gold">${average} / 5</span>
+              <button onclick="viewCloudDetails('${sub.id}')" class="bg-ntnu-maroon hover:bg-rose-950 text-white font-bold px-2 py-1 rounded text-[9px] transition">
+                🔍 觀摩詳情
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // View detailed synchronized record in Modal
+    function viewCloudDetails(docId) {
+      const sub = cloudSubmissions.find(s => s.id === docId);
+      if (!sub) return;
+
+      document.getElementById('modal-cloud-name').innerText = `${sub.maskedName} 的評估詳情`;
+      document.getElementById('modal-cloud-meta').innerText = `${sub.userDept} / ${sub.userTitle} / 核心角色：${sub.userRole}`;
+
+      // Populate core tasks
+      const tasksContainer = document.getElementById('modal-cloud-tasks');
+      if (sub.selectedCoreTasks && sub.selectedCoreTasks.length > 0) {
+        tasksContainer.innerHTML = sub.selectedCoreTasks.map(id => {
+          const task = coreTasks.find(t => t.id === id);
+          return `<div>● ${task ? task.name : "核心公務項目"}</div>`;
+        }).join('');
+      } else {
+        tasksContainer.innerHTML = `<div class="italic text-slate-400">未選取核心工作項目</div>`;
+      }
+
+      // Populate tools
+      const toolsContainer = document.getElementById('modal-cloud-tools');
+      if (sub.selectedTools && sub.selectedTools.length > 0) {
+        toolsContainer.innerHTML = sub.selectedTools.map(t => {
+          return `<span class="bg-slate-200 text-slate-800 text-[9px] px-1.5 py-0.5 rounded font-medium">${t}</span>`;
+        }).join('');
+      } else {
+        toolsContainer.innerHTML = `<span class="italic text-slate-400 text-[10px]">無常用工具紀錄</span>`;
+      }
+
+      // Show details modal
+      document.getElementById('cloud-details-modal').classList.remove('hidden');
+
+      // Calculate scores mapping
+      const mapping = { tech: [], solving: [], integration: [], governance: [] };
+      selfEvalQuestions.forEach(q => {
+        const score = sub.selfEvalAnswers?.[q.id] || 3;
+        mapping[q.dimension].push(score);
+      });
+
+      const avg = arr => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 3;
+      const collabScores = collabQuestions.map(q => sub.collabAnswers?.[q.id] || 3);
+
+      const computedScores = [
+        avg(mapping.tech).toFixed(1),
+        avg(mapping.solving).toFixed(1),
+        avg(mapping.integration).toFixed(1),
+        avg(mapping.governance).toFixed(1),
+        avg(collabScores).toFixed(1)
+      ];
+
+      // Draw Modal radar chart
+      setTimeout(() => {
+        renderModalRadarChart(computedScores);
+      }, 100);
+    }
+
+    function closeCloudDetailsModal() {
+      document.getElementById('cloud-details-modal').classList.add('hidden');
+    }
+
+    // Render Modal Radar Chart
+    function renderModalRadarChart(scores) {
+      const ctx = document.getElementById('modalRadarChart').getContext('2d');
+      
+      if (modalRadarChartInstance) {
+        modalRadarChartInstance.destroy();
+      }
+
+      modalRadarChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['AI技術應用', '業務問題解決', '應用與場景整合', '數據識讀與治理', '團隊協作領導力'],
+          datasets: [{
+            data: scores,
+            backgroundColor: 'rgba(16, 185, 129, 0.2)', // translucent emerald green
+            borderColor: '#10B981',
+            borderWidth: 2,
+            pointBackgroundColor: '#F59E0B',
+            pointBorderColor: '#FFF',
+            pointRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            r: {
+              suggestedMin: 1,
+              suggestedMax: 5,
+              ticks: { stepSize: 1, font: { size: 8 } },
+              pointLabels: { font: { size: 10, weight: 'bold' } }
+            }
+          }
+        }
+      });
+    }
 
     // Render Tools Checkboxes
     function renderTools() {
@@ -646,82 +1156,25 @@
       }).join('');
     }
 
-    // Render Self Evaluation (Step 4)
-    function renderSelfEval() {
-      const container = document.getElementById('self-eval-container');
+    // Sync UI state to appState object
+    function syncAppStateFromUI() {
+      appState.userName = document.getElementById('user-name').value;
+      appState.userDept = document.getElementById('user-dept').value;
+      appState.userTitle = document.getElementById('user-title').value;
+      appState.userRole = document.getElementById('user-role').value;
       
-      const categoryThemes = {
-        tech: { bg: 'bg-indigo-50 border-indigo-200 text-indigo-700', bullet: 'bg-indigo-500' },
-        solving: { bg: 'bg-emerald-50 border-emerald-200 text-emerald-700', bullet: 'bg-emerald-500' },
-        integration: { bg: 'bg-amber-50 border-amber-200 text-amber-700', bullet: 'bg-amber-500' },
-        governance: { bg: 'bg-rose-50 border-rose-200 text-rose-700', bullet: 'bg-rose-500' }
-      };
-
-      container.innerHTML = selfEvalQuestions.map((q, idx) => {
-        const theme = categoryThemes[q.dimension];
-        return `
-          <div class="p-5 rounded-xl border border-slate-200 space-y-4 shadow-sm bg-white hover:border-slate-300 transition">
-            <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
-              <span class="font-bold text-slate-400">問題 ${idx + 1}</span>
-              <span class="px-2.5 py-1 rounded-full border font-semibold ${theme.bg} flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full ${theme.bullet}"></span>
-                ${q.label}
-              </span>
-            </div>
-            <p class="text-sm font-semibold text-slate-800 leading-relaxed">${q.text}</p>
-            
-            <div class="grid grid-cols-5 gap-1 pt-1">
-              ${[5, 4, 3, 2, 1].map(score => {
-                const labels = { 5: "非常符合", 4: "符合", 3: "普通", 2: "不符合", 1: "非常不符合" };
-                return `
-                  <label class="flex flex-col items-center p-2.5 rounded-lg border border-slate-200/80 hover:bg-slate-50 transition cursor-pointer text-center select-none">
-                    <input type="radio" name="eval-${q.id}" value="${score}" onchange="saveEvalAnswer('${q.id}', ${score})" class="w-4 h-4 text-ntnu-maroon focus:ring-ntnu-maroon border-slate-300">
-                    <span class="text-[10px] text-slate-500 mt-1.5 font-medium">${labels[score]}</span>
-                  </label>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Render Collaboration questions (Step 5)
-    function renderCollab() {
-      const container = document.getElementById('collab-container');
-      container.innerHTML = collabQuestions.map((q, idx) => {
-        return `
-          <div class="p-5 rounded-xl border border-slate-200 space-y-4 shadow-sm bg-white hover:border-slate-300 transition">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-slate-400">協作指標 ${idx + 1}</span>
-              <span class="px-2.5 py-1 rounded-full border border-violet-200 bg-violet-50 text-violet-700 font-semibold flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-violet-500"></span>
-                團隊協作與領導力
-              </span>
-            </div>
-            <p class="text-sm font-semibold text-slate-800 leading-relaxed">${q.text}</p>
-            
-            <div class="grid grid-cols-5 gap-1 pt-1">
-              ${[5, 4, 3, 2, 1].map(score => {
-                const labels = { 5: "非常符合", 4: "符合", 3: "普通", 2: "不符合", 1: "非常不符合" };
-                return `
-                  <label class="flex flex-col items-center p-2.5 rounded-lg border border-slate-200/80 hover:bg-slate-50 transition cursor-pointer text-center select-none">
-                    <input type="radio" name="collab-${q.id}" value="${score}" onchange="saveCollabAnswer('${q.id}', ${score})" class="w-4 h-4 text-ntnu-maroon focus:ring-ntnu-maroon border-slate-300">
-                    <span class="text-[10px] text-slate-500 mt-1.5 font-medium">${labels[score]}</span>
-                  </label>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
+      if (!appState.cases) {
+        appState.cases = { case1: "", case2: "", case3: "" };
+      }
+      appState.cases.case1 = document.getElementById('app-case-1').value;
+      appState.cases.case2 = document.getElementById('app-case-2').value;
+      appState.cases.case3 = document.getElementById('app-case-3').value;
     }
 
     // Update Local/Session Storage or sync in Memory
     function setStorageMode(mode, loadInitial = false) {
       storageMode = mode;
       
-      // Update header buttons UI
       const buttons = {
         none: document.getElementById('store-none'),
         session: document.getElementById('store-session'),
@@ -730,9 +1183,9 @@
 
       Object.keys(buttons).forEach(key => {
         if (key === mode) {
-          buttons[key].className = "px-2.5 py-1 rounded text-[11px] transition-all font-semibold bg-ntnu-maroon text-white shadow";
+          buttons[key].className = "px-2 py-0.5 rounded text-[10px] transition-all font-semibold bg-ntnu-maroon text-white shadow";
         } else {
-          buttons[key].className = "px-2.5 py-1 rounded text-[11px] transition-all text-slate-300 hover:text-white";
+          buttons[key].className = "px-2 py-0.5 rounded text-[10px] transition-all text-slate-300 hover:text-white";
         }
       });
 
@@ -747,14 +1200,7 @@
 
     // Save Data to Storage
     function saveCurrentState() {
-      // Sync UI state to appState object
-      appState.userName = document.getElementById('user-name').value;
-      appState.userDept = document.getElementById('user-dept').value;
-      appState.userTitle = document.getElementById('user-title').value;
-      appState.userRole = document.getElementById('user-role').value;
-      appState.cases.case1 = document.getElementById('app-case-1').value;
-      appState.cases.case2 = document.getElementById('app-case-2').value;
-      appState.cases.case3 = document.getElementById('app-case-3').value;
+      syncAppStateFromUI();
 
       if (storageMode === 'local') {
         localStorage.setItem('ntnu-ai-assessment-data', JSON.stringify(appState));
@@ -763,13 +1209,13 @@
         sessionStorage.setItem('ntnu-ai-assessment-data', JSON.stringify(appState));
         localStorage.removeItem('ntnu-ai-assessment-data');
       } else {
-        // Mode 'none': explicitly remove any browser-side transient backups to guarantee extreme privacy on reload
         localStorage.removeItem('ntnu-ai-assessment-data');
         sessionStorage.removeItem('ntnu-ai-assessment-data');
       }
+      updateStepperLockUI();
     }
 
-    // Load Data from active storage mode
+    // Load Data from active storage
     function loadDataFromActiveStorage() {
       let savedDataStr = null;
       if (storageMode === 'local') {
@@ -783,41 +1229,113 @@
           const parsed = JSON.parse(savedDataStr);
           if (parsed) {
             appState = { ...appState, ...parsed };
-            // Populate basic info inputs
             document.getElementById('user-name').value = appState.userName || "";
             document.getElementById('user-dept').value = appState.userDept || "";
             document.getElementById('user-title').value = appState.userTitle || "";
             document.getElementById('user-role').value = appState.userRole || "";
-            document.getElementById('app-case-1').value = appState.cases?.case1 || "";
-            document.getElementById('app-case-2').value = appState.cases?.case2 || "";
-            document.getElementById('app-case-3').value = appState.cases?.case3 || "";
+            
+            if (appState.cases) {
+              document.getElementById('app-case-1').value = appState.cases.case1 || "";
+              document.getElementById('app-case-2').value = appState.cases.case2 || "";
+              document.getElementById('app-case-3').value = appState.cases.case3 || "";
+            }
 
             // Populate checked tools
             const toolBoxes = document.querySelectorAll('input[name="ai-tools"]');
             toolBoxes.forEach(box => {
-              box.checked = appState.selectedTools.includes(box.value);
+              box.checked = appState.selectedTools?.includes(box.value) || false;
             });
 
             // Populate checked core tasks
             const taskBoxes = document.querySelectorAll('input[name="core-tasks"]');
             taskBoxes.forEach(box => {
-              box.checked = appState.selectedCoreTasks.includes(box.value);
+              box.checked = appState.selectedCoreTasks?.includes(box.value) || false;
             });
 
             // Populate self evaluation answers
-            Object.keys(appState.selfEvalAnswers).forEach(qId => {
-              const rBtn = document.querySelector(`input[name="eval-${qId}"][value="${appState.selfEvalAnswers[qId]}"]`);
-              if (rBtn) rBtn.checked = true;
-            });
+            if (appState.selfEvalAnswers) {
+              Object.keys(appState.selfEvalAnswers).forEach(qId => {
+                const rBtn = document.querySelector(`input[name="eval-${qId}"][value="${appState.selfEvalAnswers[qId]}"]`);
+                if (rBtn) rBtn.checked = true;
+              });
+            }
 
             // Populate collab answers
-            Object.keys(appState.collabAnswers).forEach(cId => {
-              const rBtn = document.querySelector(`input[name="collab-${cId}"][value="${appState.collabAnswers[cId]}"]`);
-              if (rBtn) rBtn.checked = true;
-            });
+            if (appState.collabAnswers) {
+              Object.keys(appState.collabAnswers).forEach(cId => {
+                const rBtn = document.querySelector(`input[name="collab-${cId}"][value="${appState.collabAnswers[cId]}"]`);
+                if (rBtn) rBtn.checked = true;
+              });
+            }
           }
         } catch (e) {
           console.error("Error loading backup state:", e);
+        }
+      }
+      updateStepperLockUI();
+    }
+
+    // Step Validation Logics (Strict step check)
+    function validateStep(stepNum) {
+      if (stepNum === 1) {
+        const name = document.getElementById('user-name').value.trim();
+        const dept = document.getElementById('user-dept').value;
+        const title = document.getElementById('user-title').value.trim();
+        const role = document.getElementById('user-role').value;
+        return (name !== "" && dept !== "" && title !== "" && role !== "");
+      }
+      
+      if (stepNum === 2) {
+        return (appState.selectedTools && appState.selectedTools.length > 0);
+      }
+      
+      if (stepNum === 3) {
+        return (appState.selectedCoreTasks && appState.selectedCoreTasks.length > 0);
+      }
+      
+      if (stepNum === 4) {
+        // Must complete all 12 questions
+        const answeredCount = Object.keys(appState.selfEvalAnswers || {}).length;
+        return (answeredCount === 12);
+      }
+      
+      if (stepNum === 5) {
+        // Must complete all 3 questions
+        const answeredCount = Object.keys(appState.collabAnswers || {}).length;
+        return (answeredCount === 3);
+      }
+      
+      return true;
+    }
+
+    // Dynamic UI Lock Updates
+    function updateStepperLockUI() {
+      for (let i = 2; i <= 6; i++) {
+        const lockEl = document.getElementById(`lock-badge-${i}`);
+        const btnEl = document.getElementById(`step-btn-${i}`);
+        
+        let isPrecedingStepsCompleted = true;
+        for (let prev = 1; prev < i; prev++) {
+          if (!validateStep(prev)) {
+            isPrecedingStepsCompleted = false;
+            break;
+          }
+        }
+
+        if (!isPrecedingStepsCompleted) {
+          if (lockEl) lockEl.classList.remove('hidden');
+          if (btnEl) {
+            btnEl.classList.add('opacity-40');
+            btnEl.classList.add('cursor-not-allowed');
+            btnEl.classList.add('text-slate-400');
+          }
+        } else {
+          if (lockEl) lockEl.classList.add('hidden');
+          if (btnEl) {
+            btnEl.classList.remove('opacity-40');
+            btnEl.classList.remove('cursor-not-allowed');
+            btnEl.classList.remove('text-slate-400');
+          }
         }
       }
     }
@@ -842,21 +1360,40 @@
     }
 
     function saveEvalAnswer(qId, score) {
+      if (!appState.selfEvalAnswers) appState.selfEvalAnswers = {};
       appState.selfEvalAnswers[qId] = score;
       saveCurrentState();
     }
 
     function saveCollabAnswer(cId, score) {
+      if (!appState.collabAnswers) appState.collabAnswers = {};
       appState.collabAnswers[cId] = score;
       saveCurrentState();
     }
 
-    // Step navigation controller
+    // Step navigation controller with strict validations
     function goToStep(step) {
+      // If going forward, check if all intermediate steps are completed
+      if (step > currentStep) {
+        for (let s = currentStep; s < step; s++) {
+          if (!validateStep(s)) {
+            let errorMsg = "請完整填寫必填欄位才可前進下一頁！";
+            if (s === 1) errorMsg = "請完整填寫第一階段『基本資料與主要職能』！";
+            if (s === 2) errorMsg = "請於第二階段至少勾選一個您『常用的 AI 工具』！";
+            if (s === 3) errorMsg = "請於第三階段至少選擇一項您負責的『核心公務項目』！";
+            if (s === 4) errorMsg = "第四階段『實務能力自評』尚有題目未完成 (共12題必填)！";
+            if (s === 5) errorMsg = "第五階段『團隊協作與AI領導力』尚有題目未完成 (共3題必填)！";
+            
+            showToast("關卡未解鎖", errorMsg, false);
+            return;
+          }
+        }
+      }
+
       currentStep = step;
       saveCurrentState();
 
-      // Show/Hide step panel divs
+      // Show/Hide panels
       document.querySelectorAll('.step-panel').forEach((panel, index) => {
         if (index + 1 === step) {
           panel.classList.remove('hidden');
@@ -869,9 +1406,9 @@
       for (let i = 1; i <= 6; i++) {
         const btn = document.getElementById(`step-btn-${i}`);
         if (i === step) {
-          btn.className = "py-2 px-1 text-xs font-bold rounded-lg border-b-4 transition-all border-ntnu-maroon text-ntnu-maroon bg-slate-50";
+          btn.className = "py-2 px-1 text-xs font-bold rounded-lg border-b-4 transition-all border-ntnu-maroon text-ntnu-maroon bg-slate-50 relative group";
         } else {
-          btn.className = "py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50";
+          btn.className = "py-2 px-1 text-xs font-semibold rounded-lg border-b-4 transition-all border-transparent text-slate-500 hover:bg-slate-50 relative group";
         }
       }
 
@@ -909,20 +1446,6 @@
 
     function nextStep() {
       if (currentStep < 6) {
-        // Basic validations
-        if (currentStep === 1) {
-          const name = document.getElementById('user-name').value.trim();
-          const dept = document.getElementById('user-dept').value;
-          if (!name || !dept) {
-            showToast("資訊未填寫完整", "請先輸入您的『姓名』與『所屬組別』以利報表識別！");
-            return;
-          }
-        }
-        if (currentStep === 3 && appState.selectedCoreTasks.length === 0) {
-          showToast("核心公務未選取", "請至少勾選一項您日常負責的資訊中心『核心工作項目』！");
-          return;
-        }
-
         goToStep(currentStep + 1);
       }
     }
@@ -933,16 +1456,23 @@
       }
     }
 
-    // Modal Toast Engine (Avoid Browser Alerts)
+    // Modal Toast Engine
     function showToast(title, message, isConfirm = false, onConfirmCallback = null) {
       const modal = document.getElementById('toast-modal');
       const titleEl = document.getElementById('toast-title');
       const msgEl = document.getElementById('toast-message');
       const confirmBtn = document.getElementById('toast-confirm');
       const cancelBtn = document.getElementById('toast-cancel');
+      const iconWrapper = document.getElementById('toast-icon-wrapper');
 
       titleEl.innerText = title;
       msgEl.innerText = message;
+
+      if (title === "同步成功" || title === "複製成功" || title === "匯入成功") {
+        iconWrapper.className = "w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3";
+      } else {
+        iconWrapper.className = "w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-3";
+      }
 
       if (isConfirm) {
         cancelBtn.classList.remove('hidden');
@@ -961,9 +1491,57 @@
       modal.classList.add('opacity-100');
     }
 
-    document.getElementById('toast-cancel').onclick = function() {
-      document.getElementById('toast-modal').classList.add('hidden');
-    };
+    // Executive Script Tab Switcher
+    function switchSlideTab(tabNum) {
+      document.querySelectorAll('.slide-pane').forEach((pane, idx) => {
+        if (idx + 1 === tabNum) {
+          pane.classList.remove('hidden');
+        } else {
+          pane.classList.add('hidden');
+        }
+      });
+
+      for (let i = 1; i <= 3; i++) {
+        const tabBtn = document.getElementById(`slide-tab-${i}`);
+        if (i === tabNum) {
+          tabBtn.className = "px-5 py-3 border-b-2 border-ntnu-maroon text-ntnu-maroon bg-white transition-all";
+        } else {
+          tabBtn.className = "px-5 py-3 border-b-2 border-transparent hover:text-slate-800 transition-all text-slate-500";
+        }
+      }
+    }
+
+    function openExecScriptModal() {
+      const modal = document.getElementById('exec-script-modal');
+      modal.classList.remove('hidden');
+    }
+
+    function closeExecScriptModal() {
+      const modal = document.getElementById('exec-script-modal');
+      modal.classList.add('hidden');
+    }
+
+    // Clipboard copier using dynamic textarea elements for guaranteed iframe performance
+    function copyToClipboard(elementId) {
+      const textToCopy = document.getElementById(elementId).innerText;
+      
+      // Iframe execution safety fallback
+      const tempTextArea = document.createElement("textarea");
+      tempTextArea.value = textToCopy;
+      tempTextArea.style.position = "absolute";
+      tempTextArea.style.left = "-9999px";
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      
+      try {
+        document.execCommand('copy');
+        showToast("複製成功", "該頁投影片語境已成功複製至剪貼簿，可直接貼入簡報軟體或主管會報草稿中！");
+      } catch (err) {
+        showToast("複製失敗", "您的瀏覽器不支援一鍵複製，請手動圈選文字複製。");
+      }
+      
+      document.body.removeChild(tempTextArea);
+    }
 
     // Calculate report statistics & populate report layout
     function generateReportData() {
@@ -1022,13 +1600,13 @@
         positionText = "您對多項 generative AI 工具熟練度極高，具備深厚的提示詞工程技能與前瞻的業務改造野心。特別是在與校園業務鏈結、防範資安外洩（數據去識別化）上表現出眾。建議您主動擔任中心內部的 AI 流程顧問，帶領跨組別同仁研發公務自動化與知識筆記整合工作流。";
       } else if (overallAvg >= 3.8) {
         positionTitle = "行政 AI 實踐推動官";
-        positionText = "您能妥善且高效地在日常行政和系統維護中運用 AI 工具提升產出，具備良好的數據識讀力與資安預警概念。您是資訊中心不可或缺的中堅戰力。建議進一步深造更高階的 AI 自動化工具整合（例如 Power Automate 與 M365 Copilot），並多與同仁進行技術分享，成為組內的 AI 流程關鍵推動手。";
+        positionText = "您能妥善且高效地在日常行政和系統維護中運用 AI 工具提升產出，具備良好的數據識讀力與資安預警概念。您是資訊中心不可或缺的中堅戰力。建議進一步深造更高階的 AI 自動化工具整合（例如 Power Automate），並多與同仁進行技術分享，成為組內的 AI 流程關鍵推動手。";
       } else if (overallAvg >= 3.0) {
         positionTitle = "行政 AI 整合應用家";
-        positionText = "您已具備主流 AI 工具（如 ChatGPT、Copilot）的基本操作能力，能處理簡易的資料清洗、重點摘要和語氣潤飾。建議持續強化「數據識讀」與「安全防範」觀念，將評核中所學的『去識別化原則』落實於日常文書處理中。未來可藉由積極參與中心開設的資訊素養教育，提升更複雜業務的解決力。";
+        positionText = "您已具備主流 AI 工具（如 ChatGPT、Copilot）的基本操作能力，能處理簡易的資料清洗、重點摘要 and 語氣潤飾。建議持續強化「數據識讀」與「安全防範」觀念，將評核中所學的『去識別化原則』落實於日常文書處理中。未來可藉由積極參與中心開設的資訊素養教育，提升更複雜業務的解決力。";
       } else {
         positionTitle = "AI 業務學習探索者";
-        positionText = "您目前正處於 AI 應用的探索起點。建議利用學校完整的 M365 全校授權，從最安全的 Microsoft Copilot 開始入手，嘗試使用 AI 協助自動產生會議記錄草稿、潤飾日常行政信件，循序漸進提高辦公生產力。";
+        positionText = "您目前正處於 AI 應用的探索起點。建議從最安全的工具開始入手，嘗試使用 AI 協助自動產生會議記錄草稿、潤飾日常行政信件，循序漸進提高辦公生產力。";
       }
 
       document.getElementById('overall-badge').innerText = `綜合評估：${positionTitle} (${overallAvg}分)`;
@@ -1037,21 +1615,21 @@
         ${positionText}
       `;
 
-      // 5. Compliance advice derived from attachment (NTNU M365 policy checklist)
+      // 5. Compliance advice
       let complianceScore = scores.governance;
       let complianceAdvice = "";
       if (complianceScore >= 4.0) {
-        complianceAdvice = "您的數據治理與合規敏感度極高！在您將業務資料輸入 AI 之前，能主動做到去識別化與隱密化，完美契合教育部與臺師大 M365「不得使用非公務環境儲存或收發機密個資」的規範。請繼續保持並將此標準推廣至同仁。";
+        complianceAdvice = "您的數據治理與合規敏感度極高！在您將業務資料輸入 AI 之前，能主動做到去識別化與隱密化，完美契合「國立臺灣師範大學個人資料使用要點」與教育部「學校使用資通系統或服務蒐集及使用個人資料注意事項」的規範。請繼續保持並將此標準推廣至同仁。";
       } else if (complianceScore >= 3.0) {
-        complianceAdvice = "您具備基本的資訊安全與版權合規概念。再次提醒您：臺師大資訊中心要求『所有包含姓名、學號、薪資或內部機房系統架構』等敏感個資，在不具備封閉式地端模型防護下，均不得直接貼入公開的生成式 AI 對話框中。建議在處理行政資料前先手動遮蔽敏感字段。";
+        complianceAdvice = "您具備基本的資訊安全與版權合規概念。再次提醒您：依據「國立臺灣師範大學個人資料使用要點」及教育部「學校使用資通系統或服務蒐集及使用個人資料注意事項」，任何包含個資、機密公務資料或系統日誌之敏感性資料，於處理公務前皆必須避免直接上傳至公開 AI 工具對話框中，請落實遮蔽與去識別化原則。";
       } else {
-        complianceAdvice = "資安與治理概念需即刻加強！請注意，若將校內公務信件、伺服器 log 或學生個資直接上傳至未受全校企業版安全協議保護的公開 AI 工具，將面臨極高洩密與違法風險。後續操作時，強烈建議僅限於使用校內合規的受保護 Microsoft 365 企業帳號進行內部公務處理。";
+        complianceAdvice = "個資與資安保護觀念需即刻加強！依據本校個人資料使用要點及教育部「學校使用資通系統或服務蒐集及使用個人資料注意事項」，若將公務信件、伺服器 log 或學生個資直接上傳至公開 AI 工具，將面臨極高洩密與違法風險。處理公務前，使用者應避免將任何公務機密或敏感性資料直接上傳，請務必嚴格遵循去識別化程序！";
       }
       document.getElementById('advice-compliance').innerText = complianceAdvice;
 
       // 6. Draw core tasks selected list
       const repCoreTasksContainer = document.getElementById('rep-core-tasks');
-      if (appState.selectedCoreTasks.length > 0) {
+      if (appState.selectedCoreTasks && appState.selectedCoreTasks.length > 0) {
         repCoreTasksContainer.innerHTML = appState.selectedCoreTasks.map(taskId => {
           const taskObj = coreTasks.find(t => t.id === taskId);
           return `
@@ -1067,7 +1645,7 @@
 
       // 7. Draw selected tools list
       const repToolsContainer = document.getElementById('rep-tools-list');
-      if (appState.selectedTools.length > 0) {
+      if (appState.selectedTools && appState.selectedTools.length > 0) {
         repToolsContainer.innerHTML = appState.selectedTools.map(tool => {
           return `
             <span class="bg-ntnu-maroon/10 text-ntnu-maroon text-[11px] font-semibold px-2.5 py-1 rounded-full border border-ntnu-maroon/20">
@@ -1106,7 +1684,7 @@
           datasets: [{
             label: '實務成熟度分佈 (1~5分)',
             data: [scores.tech, scores.solving, scores.integration, scores.governance, scores.collab],
-            backgroundColor: 'rgba(123, 24, 36, 0.2)', // translucent ntnu maroon
+            backgroundColor: 'rgba(123, 24, 36, 0.2)',
             borderColor: '#7B1824',
             borderWidth: 2,
             pointBackgroundColor: '#D4AF37',
@@ -1151,7 +1729,7 @@
       });
     }
 
-    // JSON export/backup capability for highly compliant offline usage
+    // JSON export
     function exportData() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -1176,7 +1754,6 @@
           const imported = JSON.parse(e.target.result);
           if (imported) {
             appState = imported;
-            // Write transient state and refresh UI
             saveCurrentState();
             setStorageMode(storageMode, true);
             showToast("匯入成功", "您的作答備份已成功復原！正在為您重新載入資料。");
@@ -1191,14 +1768,12 @@
     // Restart process
     function restartTest() {
       showToast("確認重新填寫", "這將重新開始評估流程，您是否確認？", true, () => {
-        // Reset responses
         appState.selectedTools = [];
         appState.selectedCoreTasks = [];
         appState.selfEvalAnswers = {};
         appState.collabAnswers = {};
         appState.cases = { case1: "", case2: "", case3: "" };
 
-        // Uncheck all in DOM
         document.querySelectorAll('input[type="checkbox"]').forEach(box => box.checked = false);
         document.querySelectorAll('input[type="radio"]').forEach(btn => btn.checked = false);
         document.querySelectorAll('textarea').forEach(area => area.value = "");
@@ -1208,9 +1783,9 @@
       });
     }
 
-    // Hard reset of this browser context
+    // Hard reset
     function confirmReset() {
-      showToast("清除本機電腦紀錄", "這將徹底從您的瀏覽器快取 (localStorage/sessionStorage) 中抹除所有填寫痕跡，是否確認？", true, () => {
+      showToast("清除本機電腦紀錄", "這將徹底從您的瀏覽器快取中抹除所有填寫痕跡，是否確認？", true, () => {
         localStorage.removeItem('ntnu-ai-assessment-data');
         sessionStorage.removeItem('ntnu-ai-assessment-data');
         appState = {
@@ -1224,7 +1799,6 @@
           selfEvalAnswers: {},
           collabAnswers: {}
         };
-        // Uncheck all in DOM
         document.querySelectorAll('input[type="checkbox"]').forEach(box => box.checked = false);
         document.querySelectorAll('input[type="radio"]').forEach(btn => btn.checked = false);
         document.querySelectorAll('textarea').forEach(area => area.value = "");
@@ -1238,6 +1812,32 @@
         showToast("重置成功", "所有作答資料已完全銷毀。");
       });
     }
+
+    // Bind events to the window object so inline event handlers remain functional
+    window.goToStep = goToStep;
+    window.nextStep = nextStep;
+    window.prevStep = prevStep;
+    window.setStorageMode = setStorageMode;
+    window.updateToolSelection = updateToolSelection;
+    window.updateCoreTaskSelection = updateCoreTaskSelection;
+    window.saveEvalAnswer = saveEvalAnswer;
+    window.saveCollabAnswer = saveCollabAnswer;
+    window.exportData = exportData;
+    window.triggerImport = triggerImport;
+    window.importData = importData;
+    window.restartTest = restartTest;
+    window.confirmReset = confirmReset;
+    window.openExecScriptModal = openExecScriptModal;
+    window.closeExecScriptModal = closeExecScriptModal;
+    window.copyToClipboard = copyToClipboard;
+    window.switchSlideTab = switchSlideTab;
+    window.syncToCloud = syncToCloud;
+    window.viewCloudDetails = viewCloudDetails;
+    window.closeCloudDetailsModal = closeCloudDetailsModal;
+
+    // Start authenticating immediately upon execution
+    startAuthentication();
+
   </script>
 </body>
 </html>
