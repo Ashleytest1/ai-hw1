@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-Hant-TW">
 <head>
   <meta charset="UTF-8">
@@ -67,9 +67,6 @@
   <header class="bg-ntnu-maroon text-white shadow-md no-print sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col lg:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainView('assessment')">
-        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-ntnu-maroon font-bold text-lg border-2 border-ntnu-gold shadow-inner select-none">
-          師
-        </div>
         <div>
           <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
             國立臺灣師範大學資訊中心
@@ -87,7 +84,7 @@
         <!-- View Switch Button -->
         <button id="view-switch-btn" onclick="toggleMainView()" class="bg-ntnu-gold hover:bg-yellow-600 text-slate-950 font-bold px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition shadow-md">
           <span id="view-switch-icon">📊</span>
-          <span id="view-switch-text">資訊中心主管查看分析</span>
+          <span id="view-switch-text">AI 能力分析入口</span>
         </button>
 
         <div class="bg-black/20 p-1.5 rounded-lg border border-white/10 text-xs flex items-center gap-2" id="privacy-selector-container">
@@ -201,11 +198,11 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label class="block text-sm font-semibold text-slate-700 mb-1.5">姓名<span class="text-red-500">*</span></label>
-              <input type="text" id="user-name" oninput="saveCurrentState()" placeholder="請輸入姓名" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+              <input type="text" id="user-name" oninput="checkIdentityField()" placeholder="請輸入姓名（需與 Firestore staff 名冊相符）" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
             </div>
             <div>
               <label class="block text-sm font-semibold text-slate-700 mb-1.5">所屬組別 <span class="text-red-500">*</span></label>
-              <select id="user-dept" onchange="saveCurrentState()" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+              <select id="user-dept" onchange="checkIdentityField()" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
                 <option value="">-- 請選擇組別 --</option>
                 <option value="主任室">主任室</option>
                 <option value="行政支援組">行政支援組</option>
@@ -216,11 +213,11 @@
             </div>
             <div>
               <label class="block text-sm font-semibold text-slate-700 mb-1.5">目前職稱 <span class="text-red-500">*</span></label>
-              <input type="text" id="user-title" oninput="saveCurrentState()" placeholder="如：技士、資料管理師、系統分析師、行政幹事" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+              <input type="text" id="user-title" oninput="checkIdentityField()" placeholder="請依資訊中心職稱填寫，例如：技士、系統分析師" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
             </div>
             <div>
               <label class="block text-sm font-semibold text-slate-700 mb-1.5">主要職能 (對應 AI 角色指標) <span class="text-red-500">*</span></label>
-              <select id="user-role" onchange="saveCurrentState()" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
+              <select id="user-role" onchange="checkIdentityField()" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-ntnu-maroon focus:border-ntnu-maroon outline-none transition text-sm">
                 <option value="">-- 請選擇您最貼近的職能職稱 --</option>
                 <option value="專案管理">專案管理 (Project Management)</option>
                 <option value="行政管理">行政管理 (Administration)</option>
@@ -231,6 +228,17 @@
               </select>
             </div>
           </div>
+
+          <!-- 身分核對狀態 -->
+          <div id="identity-status" class="mt-4 px-4 py-3 rounded-lg text-sm font-semibold leading-relaxed bg-amber-50 border border-amber-200 text-amber-800">
+            請先使用學校 Google 帳號登入；系統會讀取 Firestore staff/{email} 名冊，再核對您自行填寫的姓名、組別與職稱是否一致。
+          </div>
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            <button id="staff-login-btn" onclick="staffLogin()" class="px-4 py-2 bg-ntnu-maroon hover:bg-rose-950 text-white rounded-lg text-xs font-bold transition shadow-sm">使用學校 Google 帳號登入</button>
+            <button id="staff-logout-btn" onclick="staffLogout()" class="hidden px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition border border-slate-300">登出 Google 帳號</button>
+            <span id="staff-login-email" class="text-[11px] text-slate-500 font-mono"></span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2 pl-1">＊ 本系統僅供資訊中心現職同仁填寫。需以 @ntnu.edu.tw 或 @gapps.ntnu.edu.tw 登入，且 Firestore <code class="bg-slate-100 px-1 py-0.5 rounded">staff/{email}</code> 名冊存在；姓名、組別、職稱由填寫者自行輸入，但必須與名冊相符。</p>
         </div>
 
         <!-- STEP 2: 常用 AI 工具 -->
@@ -349,7 +357,7 @@
             <div class="flex flex-col md:flex-row justify-between md:items-center gap-3">
               <div>
                 <h4 class="font-bold text-slate-800 text-sm">🎉 評估已完成！已生成您的個人AI即戰力報告</h4>
-                <p class="text-xs text-slate-500">同意並儲存上傳後，您的評量將呈現在「資訊中心主管查看分析」中。</p>
+                <p class="text-xs text-slate-500">同意並儲存上傳後，您的評量將呈現在「AI 能力分析入口」中。</p>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button onclick="syncToCloud()" id="cloud-sync-btn" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md">
@@ -589,15 +597,31 @@
   <!-- ======================================================= -->
   <!-- VIEW 2: INDEPENDENT SUPERVISOR DASHBOARD PAGE            -->
   <!-- ======================================================= -->
-  <div id="view-supervisor" class="flex-grow flex flex-col hidden bg-slate-950 text-slate-100 min-h-[calc(100vh-64px)] transition-all duration-300">
-    
+  <div id="view-supervisor" class="relative flex-grow flex flex-col hidden bg-slate-950 text-slate-100 min-h-[calc(100vh-64px)] transition-all duration-300">
+
+    <!-- 主管登入閘門：未通過驗證前覆蓋整個主控台 -->
+    <div id="supervisor-login-gate" class="absolute inset-0 z-40 bg-slate-950/95 backdrop-blur flex items-center justify-center p-6">
+      <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-5">
+        <div class="text-center space-y-1">
+          <div class="text-3xl">🔐</div>
+          <h2 class="text-base font-bold text-ntnu-gold">分析入口身分驗證</h2>
+          <p class="text-[11px] text-slate-400 leading-relaxed">請以學校 Google 帳號登入。一般同仁僅能查看本人資料；帳號列於 Firestore admins/{email} 的主管可查看全體分析。</p>
+        </div>
+        <div class="space-y-3">
+          <p id="supervisor-login-error" class="text-[11px] text-rose-400 hidden"></p>
+          <button id="supervisor-login-btn" onclick="supervisorLogin()" class="w-full py-2.5 bg-ntnu-gold hover:bg-yellow-600 text-slate-950 text-xs font-bold rounded-lg transition shadow-md">使用學校 Google 帳號登入分析入口</button>
+        </div>
+        <button onclick="switchMainView('assessment')" class="w-full text-[11px] text-slate-500 hover:text-slate-300 transition">← 返回同仁檢測系統</button>
+      </div>
+    </div>
+
     <!-- Dashboard Subheader -->
     <div class="bg-slate-900 border-b border-slate-800 py-6 px-6 shadow-md">
       <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div class="flex items-center gap-2">
             <span class="text-xl">📊</span>
-            <h2 class="text-lg font-bold text-ntnu-gold tracking-wider">資訊中心主管查看分析主控台</h2>
+            <h2 class="text-lg font-bold text-ntnu-gold tracking-wider">AI 能力分析入口主控台</h2>
           </div>
           <p class="text-xs text-slate-400 mt-1">彙整中心同仁 AI 實務能力數據、雲端同步狀態、以及主管會報分析簡報</p>
         </div>
@@ -609,6 +633,9 @@
           </div>
           <button onclick="switchMainView('assessment')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-200 border border-slate-700 transition">
             🔙 返回同仁檢測系統
+          </button>
+          <button onclick="supervisorLogout()" class="px-4 py-2 bg-rose-900/60 hover:bg-rose-900 text-xs font-semibold rounded-lg text-rose-200 border border-rose-800 transition">
+            🚪 登出分析入口
           </button>
         </div>
       </div>
@@ -726,8 +753,9 @@
             <ol class="list-decimal pl-5 space-y-1 text-[11px]">
               <li>至 <a href="https://console.firebase.google.com/" target="_blank" class="underline text-indigo-400">Firebase 控制台</a> 建立新專案。</li>
               <li>啟用 Web 應用程式，並在 Database 區塊啟用 <strong>Cloud Firestore</strong> 資料庫。</li>
-              <li>在驗證區塊啟用 <strong>Anonymous (匿名登入)</strong>。</li>
-              <li>在 Firestore 安全規則(Rules) 貼入允許寫入的權限（請務必參考本機同步指南說明）。</li>
+              <li>在驗證(Authentication)區塊啟用 <strong>Google</strong> 登入，並於 Authorized domains 加入部署網域。</li>
+              <li>建立 <strong>staff</strong> 集合（文件 ID 為同仁 email，含 name/dept/title）與 <strong>admins</strong> 集合（文件 ID 為主管 email）。</li>
+              <li>在 Firestore 安全規則(Rules) 貼入分層權限規則：只有學校 Google 帳號且 staff 名冊相符者能寫入；admins/{email} 可讀取全部。</li>
             </ol>
           </div>
         </div>
@@ -754,17 +782,7 @@
                 <span class="text-slate-400">主管會報投影片內容：</span>
                 <button onclick="copyToClipboard('slide-text-1')" class="bg-ntnu-maroon hover:bg-rose-950 text-white px-2.5 py-1 rounded text-[10px] font-bold transition">複製投影片一文字</button>
               </div>
-              <div id="slide-text-1" class="bg-slate-950 p-4 rounded-xl border border-slate-850 font-mono text-[11px] whitespace-pre-wrap leading-relaxed text-slate-300">投影片一、問卷調查階段 (利用AI協助與調查成果)
-
-1.1 如何生成問卷？
-本評估系統結合國立臺灣師範大學資訊中心十大核心公務項目，利用 GPT-4 與 Microsoft Copilot 協同生成精準 Prompt（提示詞範本）。自動產生符合行政同仁及技術組別之雙量化成熟度自評題目（共12項成熟度指標），大幅節省專家設計問卷時間達 85%。
-
-1.2 如何施測？
-本系統採用「純前端安全離線沙盒」架構。可配合離線數據完全不落公有伺服器，或在主管會報中，由主管串接中心自訂的 Firebase 資料庫，同仁資料傳輸與儲存合規安全，滿足教育部資訊機密保護規範。
-
-1.3 如何呈現調查結果？ (以下為本單位真實成果數據)
-- 「數據識讀與治理 (含M365安全防護)」維度：平均成熟度達 3.82 / 5 分，顯示同仁已具備良好的「資料去識別化與隱密操作」安全敏感度。
-- 「團隊協作與AI領導力」維度：平均得分高達 4.15 / 5 分，反映中心同仁於跨組別分享 AI 技術流（如會議逐字稿生成、自動擬答）具有極高的意願與擴散力。</div>
+              <div id="slide-text-1" class="bg-slate-950 p-4 rounded-xl border border-slate-850 font-mono text-[11px] whitespace-pre-wrap leading-relaxed text-slate-300">（載入中…進入此分頁將依全體填答者資料即時統計生成）</div>
             </div>
 
             <!-- Slide 2 -->
@@ -773,26 +791,7 @@
                 <span class="text-slate-400">主管會報投影片內容：</span>
                 <button onclick="copyToClipboard('slide-text-2')" class="bg-ntnu-maroon hover:bg-rose-950 text-white px-2.5 py-1 rounded text-[10px] font-bold transition">複製投影片二文字</button>
               </div>
-              <div id="slide-text-2" class="bg-slate-950 p-4 rounded-xl border border-slate-850 font-mono text-[11px] whitespace-pre-wrap leading-relaxed text-slate-300">投影片二、反思階段 (確立資訊中心AI戰力定位與影響)
-
-2.1 資訊中心目前最需要哪些 AI 能力？ (確立即戰力)
-1. 公務數據識讀與去識別化技術（確保輸入 AI 工具的資料已完成脫敏，無任何個資與機密外洩風險）。
-2. 精準提示詞工程與公務範本化（Prompt Engineering for Admin Tasks）。
-3. 封閉式校園微軟 M365 Copilot 與自動化工具整合（例如 Power Automate 自動化行政工單分派）。
-
-2.2 如何進行強化上述 AI 即戰力與補足缺口？
-- 建立並推廣「公用 Prompt 範本共享庫」，整合常規客服信件解答、公文大綱擬定與資安漏洞日誌分析。
-- 舉辦中心專屬之「全體同仁 AI 工作流實戰演練」，重點培訓 Microsoft Copilot 教育版。
-- 開設「大專院校 AI 數據治理與隱私防護 SOP」資訊素養講座。
-
-2.3 導入AI後，將對單位造成哪些具體正反面影響？
-- 關鍵正面影響：
-  1. 行政公文擬稿與會議記錄摘要效率提升達 55% 以上。
-  2. 縮短常規系統與網管 log 偵錯與防護通報回應時間 40%。
-  3. 降低新進同仁與跨組別知識傳承、客服擬答之時間成本。
-- 潛在風險與防範：
-  1. 資訊幻覺與誤判風險 ➔ 防範機制：建立標準「雙重人工覆核機制 (SOP)」。
-  2. 機密數據不慎外流 ➔ 防範機制：導入全套「行政個資與敏感資訊預處理 Prompt過濾範本」，規定必須使用校園合規 Microsoft 365 企業受保護帳號。</div>
+              <div id="slide-text-2" class="bg-slate-950 p-4 rounded-xl border border-slate-850 font-mono text-[11px] whitespace-pre-wrap leading-relaxed text-slate-300">（載入中…進入此分頁將依全體填答者資料即時統計生成）</div>
             </div>
 
             <!-- Slide 3 -->
@@ -801,26 +800,7 @@
                 <span class="text-slate-400">主管會報投影片內容：</span>
                 <button onclick="copyToClipboard('slide-text-3')" class="bg-ntnu-maroon hover:bg-rose-950 text-white px-2.5 py-1 rounded text-[10px] font-bold transition">複製投影片三文字</button>
               </div>
-              <div id="slide-text-3" class="bg-slate-950 p-4 rounded-xl border border-slate-850 font-mono text-[11px] whitespace-pre-wrap leading-relaxed text-slate-300">投影片三、行動階段 (具體落實資訊中心工作AI化)
-
-3.1 梳理資訊中心流程，選定導入AI化關鍵節點
-- 關鍵導入節點 A：校務客服技術諮詢信件擬答。
-- 關鍵導入節點 B：系統與伺服器 Log 異常分析與防範警告自動通報。
-- 關鍵導入節點 C：大專院校 ODF 開放文件快速格式校對。
-
-3.2 具體規劃與設計導入 AI 的 4 大步驟 (流程圖已在網頁上視覺化)
-- 步驟一：公用 Prompt 範本建立 ➔ 所需時間：1.5 週
-  （研發技術客服、會報摘要及程式偵錯最優化 Prompt 組合並集中存檔）
-- 步驟二：工具導入訓練 ➔ 所需時間：2.0 週
-  （開辦全體行政與技術同仁實務 AI 工作流與合規 M365 工具整合演練）
-- 步驟三：機密個資篩檢稽核機制 ➔ 所需時間：1.0 週
-  （建立去識別化前置篩選 SOP 與定期檢視，規避智慧財產與個人隱私外流）
-- 步驟四：日常公務工作流全面整合 ➔ 所需時間：3.0 週
-  （將 Prompt 範本庫全面串聯於公文起草、行政會報簡報、工單回覆、網站客服）
-
-3.3 預期達到之 AI 化成效與綜合指標
-- 時間成效：整體公務處理與公文撰寫時間「縮短 55%」。
-- 安全合規：導入全套「行政個資過濾 Prompt」，確保技術諮詢服務、信件傳輸與合規數據傳輸達成「零資安風險、零法規合規風險」。</div>
+              <div id="slide-text-3" class="bg-slate-950 p-4 rounded-xl border border-slate-850 font-mono text-[11px] whitespace-pre-wrap leading-relaxed text-slate-300">（載入中…進入此分頁將依全體填答者資料即時統計生成）</div>
             </div>
           </div>
         </div>
@@ -941,17 +921,35 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'ntnu-ai-capability-dashboard';
+
+    // 單一來源的預設 Firebase 設定（避免兩處寫死不同步）
+    const DEFAULT_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCYtjGnq_2caT0GTSm40A6qSA40JfLd8LM",
+      authDomain: "aihw1-c5063.firebaseapp.com",
+      projectId: "aihw1-c5063",
+      storageBucket: "aihw1-c5063.firebasestorage.app",
+      messagingSenderId: "1043040377392",
+      appId: "1:1043040377392:web:e376d664b8b9d8145a6bf5",
+      measurementId: "G-PHH67ZM6LV"
+    };
 
     let customFirebaseApp = null;
     let db = null;
     let auth = null;
     let analytics = null;
     let isCloudConnected = false;
+    let isSupervisor = false;       // 是否已通過分析入口身分驗證
+    let isAnalysisViewer = false;   // 是否可進入分析入口（主管看全體；同仁只看本人）
+    let supervisorUnsub = null;     // 分析清單監聽的取消函式
+    let authStateUnsub = null;      // Firebase Auth 狀態監聽取消函式
+    let currentAuthEmail = "";
+    let currentStaffProfile = null;
+    let staffAuthReady = false;
 
     let cloudSubmissions = []; 
     let supervisorLocalSubmissions = []; 
@@ -1073,13 +1071,21 @@
         viewSwitchText.innerText = "返回同仁檢測系統";
         viewSwitchIcon.innerText = "🔙";
         viewSwitchBtn.className = "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition shadow-sm";
-        privacySelector.classList.add('hidden'); 
-        renderSubmissionList();
-        renderSupervisorLocalList();
+        privacySelector.classList.add('hidden');
+        const gate = document.getElementById('supervisor-login-gate');
+        if (isAnalysisViewer) {
+          gate.classList.add('hidden');
+          updateAnalysisAccessUI();
+          renderSubmissionList();
+          renderSupervisorLocalList();
+        } else {
+          // 未通過 Google / staff 驗證：顯示登入閘門，不渲染任何同仁資料
+          gate.classList.remove('hidden');
+        }
       } else {
         viewAssessment.classList.remove('hidden');
         viewSupervisor.classList.add('hidden');
-        viewSwitchText.innerText = "資訊中心主管查看分析";
+        viewSwitchText.innerText = "AI 能力分析入口";
         viewSwitchIcon.innerText = "📊";
         viewSwitchBtn.className = "bg-ntnu-gold hover:bg-yellow-600 text-slate-950 font-bold px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition shadow-md";
         privacySelector.classList.remove('hidden');
@@ -1100,27 +1106,34 @@
 
     async function setupFirebaseConnection(config) {
       try {
+        if (authStateUnsub) { authStateUnsub(); authStateUnsub = null; }
         customFirebaseApp = initializeApp(config, "customAppInstance");
         db = getFirestore(customFirebaseApp);
         auth = getAuth(customFirebaseApp);
 
-        // Optional support for Analytics
         try {
           analytics = getAnalytics(customFirebaseApp);
         } catch (analyticsErr) {
           console.warn("Analytics initialization skipped (probably blocked by iframe sandbox):", analyticsErr);
         }
 
-        await signInAnonymously(auth);
-        
+        authStateUnsub = onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            await loadStaffProfileFromAuth(user, { silent: true });
+          } else {
+            resetStaffAuthState();
+          }
+          updateStepperLockUI();
+        });
+
         isCloudConnected = true;
         updateConnectionUI(true);
-        setupRealtimeSync();
+        if (isAnalysisViewer) startAnalysisRealtimeSync();
       } catch (err) {
         console.error("Firebase dynamic initialization failed:", err);
         isCloudConnected = false;
         updateConnectionUI(false);
-        showToast("雲端連線失敗", "預設/自訂 Firebase SDK 配置資訊有誤，或您的 Firestore 規則阻擋了寫入。請檢視本機設定或閱讀沙箱指南。");
+        showToast("雲端連線失敗", "預設/自訂 Firebase SDK 配置資訊有誤，或您的 Firestore 規則阻擋了讀寫。請檢視本機設定或閱讀沙箱指南。");
       }
     }
 
@@ -1188,15 +1201,7 @@
 
     window.clearCustomFirebase = async function() {
       localStorage.removeItem('ntnu_custom_firebase_config_str');
-      const defaultFirebaseConfig = {
-        apiKey: "AIzaSyCYtjGnq_2caT0GTSm40A6qSA40JfLd8LM",
-        authDomain: "aihw1-c5063.firebaseapp.com",
-        projectId: "aihw1-c5063",
-        storageBucket: "aihw1-c5063.firebasestorage.app",
-        messagingSenderId: "1043040377392",
-        appId: "1:1043040377392:web:e376d664b8b9d8145a6bf5",
-        measurementId: "G-PHH67ZM6LV"
-      };
+      const defaultFirebaseConfig = DEFAULT_FIREBASE_CONFIG;
       document.getElementById('custom-firebase-config').value = JSON.stringify(defaultFirebaseConfig, null, 2);
       isCloudConnected = false;
       db = null;
@@ -1206,24 +1211,122 @@
       showToast("重置成功", "已還原為預設專案資料庫配置，系統已成功與預設雲端完成連線。");
     }
 
-    function setupRealtimeSync() {
-      if (!db) return;
-      const submissionsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'submissions');
-      
-      onSnapshot(submissionsCollection, (snapshot) => {
-        cloudSubmissions = [];
-        snapshot.forEach((doc) => {
-          cloudSubmissions.push({
-            id: doc.id,
-            ...doc.data()
+    // 分析入口監聽：主管看全體；一般同仁只看本人文件（後端規則亦強制）
+    function startAnalysisRealtimeSync() {
+      if (!db || !auth?.currentUser || !isAnalysisViewer) return;
+      if (supervisorUnsub) { supervisorUnsub(); supervisorUnsub = null; }
+
+      if (isSupervisor) {
+        const submissionsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'submissions');
+        supervisorUnsub = onSnapshot(submissionsCollection, (snapshot) => {
+          cloudSubmissions = [];
+          snapshot.forEach((d) => {
+            cloudSubmissions.push({ id: d.id, ...d.data() });
           });
+          cloudSubmissions.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+          renderSubmissionList();
+          renderSupervisorBriefing();
+        }, (error) => {
+          console.error("Snapshot dynamic fetch connection failed:", error);
+          showToast("雲端連線異常", "無法獲取 Firestore 全體清單，請確認此帳號已列入 admins/{email}，以及資料庫安全規則與連線狀態。");
         });
-        cloudSubmissions.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        return;
+      }
+
+      const ownDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', auth.currentUser.uid);
+      supervisorUnsub = onSnapshot(ownDocRef, (snapshot) => {
+        cloudSubmissions = snapshot.exists() ? [{ id: snapshot.id, ...snapshot.data() }] : [];
         renderSubmissionList();
+        renderSupervisorBriefing();
       }, (error) => {
-        console.error("Snapshot dynamic fetch connection failed:", error);
-        showToast("雲端連線異常", "無法獲取 Firestore 動態列表，請檢查資料庫安全規則與連線。");
+        console.error("Own submission fetch failed:", error);
+        showToast("雲端連線異常", "無法讀取您的個人分析資料，請確認已完成 Google 登入與 staff 名冊驗證。");
       });
+    }
+
+    function updateAnalysisAccessUI() {
+      const tabsForAdminOnly = [2, 3, 4];
+      tabsForAdminOnly.forEach(tabNum => {
+        const btn = document.getElementById('super-tab-' + tabNum);
+        if (!btn) return;
+        if (isSupervisor) btn.classList.remove('hidden');
+        else btn.classList.add('hidden');
+      });
+      const title = document.querySelector('#view-supervisor h2');
+      const subtitle = title?.closest('div')?.parentElement?.querySelector('p');
+      if (title) title.innerText = isSupervisor ? 'AI 能力分析入口主控台' : '個人 AI 能力分析入口';
+      if (subtitle) subtitle.innerText = isSupervisor
+        ? '彙整中心同仁 AI 實務能力數據、雲端同步狀態、以及主管會報分析簡報'
+        : '一般同仁僅可讀取本人已上傳的 AI 能力分析資料';
+      if (!isSupervisor) window.switchSupervisorTab(1);
+    }
+
+    function showSupervisorLoginError(msg) {
+      const errEl = document.getElementById('supervisor-login-error');
+      errEl.innerText = msg;
+      errEl.classList.remove('hidden');
+    }
+
+    function getGoogleProvider() {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      return provider;
+    }
+
+    async function signInWithSchoolGoogle() {
+      if (!db || !auth) throw new Error('Firebase 尚未連線。');
+      const cred = await signInWithPopup(auth, getGoogleProvider());
+      return cred.user;
+    }
+
+    window.supervisorLogin = async function() {
+      const btn = document.getElementById('supervisor-login-btn');
+      document.getElementById('supervisor-login-error').classList.add('hidden');
+      if (!db || !auth) { showSupervisorLoginError('雲端尚未連線，請先於「雲端 Firebase 串接」完成設定後再登入。'); return; }
+
+      btn.disabled = true; btn.innerText = '驗證中...';
+      try {
+        const user = await signInWithSchoolGoogle();
+        const staffOk = await loadStaffProfileFromAuth(user, { silent: true });
+        if (!currentAuthEmail || !isAllowedSchoolEmail(currentAuthEmail)) {
+          showSupervisorLoginError('請使用 @ntnu.edu.tw 或 @gapps.ntnu.edu.tw 學校 Google 帳號登入。');
+          return;
+        }
+        const adminSnap = await getDoc(doc(db, 'admins', currentAuthEmail));
+        isSupervisor = adminSnap.exists();
+        if (!isSupervisor && !staffOk) {
+          showSupervisorLoginError('此 Google 帳號未列入 staff/{email} 名冊，無法進入分析入口。');
+          return;
+        }
+        isAnalysisViewer = true;
+        document.getElementById('supervisor-login-gate').classList.add('hidden');
+        updateAnalysisAccessUI();
+        startAnalysisRealtimeSync();
+        renderSubmissionList();
+        renderSupervisorLocalList();
+        showToast('驗證成功', isSupervisor ? '主管身分確認，已開通全體同仁分析資料。' : '同仁身分確認，僅開通您本人的分析資料。');
+      } catch (err) {
+        console.error('Supervisor login failed:', err);
+        showSupervisorLoginError('Google 登入或主管權限驗證失敗，請確認帳號與 Firestore admins/{email} 設定。');
+      } finally {
+        btn.disabled = false; btn.innerText = '使用學校 Google 帳號登入分析入口';
+      }
+    }
+
+    window.supervisorLogout = async function() {
+      try {
+        if (supervisorUnsub) { supervisorUnsub(); supervisorUnsub = null; }
+        isSupervisor = false;
+        isAnalysisViewer = false;
+        cloudSubmissions = [];
+        if (auth) { await signOut(auth); }
+      } catch (e) {
+        console.error('Supervisor logout error:', e);
+      }
+      const gate = document.getElementById('supervisor-login-gate');
+      if (gate) gate.classList.remove('hidden');
+      switchMainView('assessment');
+      showToast('已登出', '主管主控台已關閉，Google 帳號已登出。');
     }
 
     function renderSubmissionList() {
@@ -1412,6 +1515,9 @@
           tabBtn.className = "w-full text-left px-4 py-2.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-2 border-l-4 border-transparent text-slate-400 hover:text-white hover:bg-slate-800/50";
         }
       }
+
+      // 進入「主管會報簡報語境」時，依全體填答者資料即時重算
+      if (tabNum === 4) renderSupervisorBriefing();
     }
 
     window.triggerSupervisorImport = function() {
@@ -1457,6 +1563,7 @@
 
     function renderSupervisorLocalList() {
       const container = document.getElementById('supervisor-local-list');
+      renderSupervisorBriefing();
       if (supervisorLocalSubmissions.length === 0) {
         container.innerHTML = `<div class="md:col-span-2 text-center py-6 text-xs text-slate-500 italic">目前尚無手動匯入的同仁檔案。</div>`;
         return;
@@ -1651,9 +1758,9 @@
     }
 
     function syncAppStateFromUI() {
-      appState.userName = document.getElementById('user-name').value;
+      appState.userName = normStr(document.getElementById('user-name').value);
       appState.userDept = document.getElementById('user-dept').value;
-      appState.userTitle = document.getElementById('user-title').value;
+      appState.userTitle = normStr(document.getElementById('user-title').value);
       appState.userRole = document.getElementById('user-role').value;
       
       if (!appState.cases) {
@@ -1740,10 +1847,184 @@
 
             switchEvalDimension(currentEvalDimension);
             renderCollabQuestions();
+            // 還原既有資料後，重新顯示身分核對狀態
+            if (appState.userName) checkIdentityField();
           }
         } catch (e) {
           console.error("Error loading backup state:", e);
         }
+      }
+      updateStepperLockUI();
+    }
+
+    // ===== Google / Firestore staff 身分驗證 =====
+    const ALLOWED_EMAIL_DOMAINS = ['ntnu.edu.tw', 'gapps.ntnu.edu.tw'];
+    const normStr = s => (s || '').replace(/\s+/g, '').trim();
+    const normEmail = email => (email || '').trim().toLowerCase();
+    const normCompare = s => normStr(s).toLowerCase();
+
+    function isAllowedSchoolEmail(email) {
+      const e = normEmail(email);
+      return ALLOWED_EMAIL_DOMAINS.some(domain => e.endsWith('@' + domain));
+    }
+
+    function staffValues(profile, keys) {
+      if (!profile) return [];
+      const values = [];
+      keys.forEach(key => {
+        const value = profile[key];
+        if (Array.isArray(value)) values.push(...value);
+        else if (value) values.push(value);
+      });
+      return values.filter(Boolean);
+    }
+
+    function matchesStaffValue(profile, keys, input) {
+      const target = normCompare(input);
+      return target !== '' && staffValues(profile, keys).some(v => normCompare(v) === target);
+    }
+
+    function isFakeTitle(title) {
+      const t = normCompare(title);
+      if (!t) return true;
+      return /^(aa|aaa|test|testing|測試|無|none|null|na|n\/a|123|000|xxx|asdf)$/.test(t);
+    }
+
+    function resetStaffAuthState() {
+      currentAuthEmail = '';
+      currentStaffProfile = null;
+      staffAuthReady = false;
+      const emailEl = document.getElementById('staff-login-email');
+      const loginBtn = document.getElementById('staff-login-btn');
+      const logoutBtn = document.getElementById('staff-logout-btn');
+      if (emailEl) emailEl.innerText = '';
+      if (loginBtn) loginBtn.classList.remove('hidden');
+      if (logoutBtn) logoutBtn.classList.add('hidden');
+      checkIdentityField();
+    }
+
+    async function loadStaffProfileFromAuth(user, opts = {}) {
+      currentAuthEmail = normEmail(user?.email || '');
+      currentStaffProfile = null;
+      staffAuthReady = false;
+      const emailEl = document.getElementById('staff-login-email');
+      const loginBtn = document.getElementById('staff-login-btn');
+      const logoutBtn = document.getElementById('staff-logout-btn');
+      if (emailEl) emailEl.innerText = currentAuthEmail ? '已登入：' + currentAuthEmail : '';
+      if (loginBtn) loginBtn.classList.add('hidden');
+      if (logoutBtn) logoutBtn.classList.remove('hidden');
+
+      if (!currentAuthEmail || !isAllowedSchoolEmail(currentAuthEmail)) {
+        checkIdentityField();
+        if (!opts.silent) showToast('帳號不符', '請使用 @ntnu.edu.tw 或 @gapps.ntnu.edu.tw 學校 Google 帳號登入。');
+        return false;
+      }
+      if (!db) return false;
+      const staffSnap = await getDoc(doc(db, 'staff', currentAuthEmail));
+      if (!staffSnap.exists()) {
+        checkIdentityField();
+        if (!opts.silent) showToast('未列入名冊', '此 Google 帳號未列入 Firestore staff/{email} 名冊，無法填寫。');
+        return false;
+      }
+      currentStaffProfile = { email: currentAuthEmail, ...staffSnap.data() };
+      staffAuthReady = true;
+      checkIdentityField();
+      return true;
+    }
+
+    async function refreshStaffProfileForSubmit() {
+      if (!auth?.currentUser) return false;
+      return loadStaffProfileFromAuth(auth.currentUser, { silent: true });
+    }
+
+    window.staffLogin = async function() {
+      const btn = document.getElementById('staff-login-btn');
+      if (!db || !auth) { showToast('雲端尚未連線', '請先確認 Firebase 連線成功。'); return; }
+      btn.disabled = true; btn.innerText = 'Google 登入中...';
+      try {
+        const user = await signInWithSchoolGoogle();
+        const ok = await loadStaffProfileFromAuth(user);
+        if (ok) showToast('登入成功', '已確認學校 Google 帳號與 Firestore staff 名冊，請自行填寫姓名、組別與職稱完成核對。');
+      } catch (err) {
+        console.error('Staff Google login failed:', err);
+        showToast('Google 登入失敗', '請重新選擇學校 Google 帳號，或確認瀏覽器未阻擋彈出視窗。');
+      } finally {
+        btn.disabled = false; btn.innerText = '使用學校 Google 帳號登入';
+      }
+    }
+
+    window.staffLogout = async function() {
+      try {
+        if (supervisorUnsub) { supervisorUnsub(); supervisorUnsub = null; }
+        isSupervisor = false;
+        isAnalysisViewer = false;
+        if (auth) await signOut(auth);
+      } catch (err) {
+        console.error('Staff logout failed:', err);
+      }
+      resetStaffAuthState();
+      updateStepperLockUI();
+      showToast('已登出', 'Google 帳號已登出；填表身分鎖定。');
+    }
+
+    function markIdentityField(el, state) {
+      if (!el) return;
+      el.classList.remove('border-red-400', 'bg-red-50', 'border-emerald-500', 'bg-emerald-50');
+      if (state === 'bad') el.classList.add('border-red-400', 'bg-red-50');
+      if (state === 'ok') el.classList.add('border-emerald-500', 'bg-emerald-50');
+    }
+
+    function validateStaffInput() {
+      const name = document.getElementById('user-name')?.value || '';
+      const dept = document.getElementById('user-dept')?.value || '';
+      const title = document.getElementById('user-title')?.value || '';
+      const role = document.getElementById('user-role')?.value || '';
+      if (!auth?.currentUser || !currentAuthEmail) return { ok: false, code: 'nologin' };
+      if (!isAllowedSchoolEmail(currentAuthEmail)) return { ok: false, code: 'baddomain' };
+      if (!currentStaffProfile) return { ok: false, code: 'nostaff' };
+      if (!normStr(name)) return { ok: false, code: 'needname' };
+      if (!dept) return { ok: false, code: 'needdept' };
+      if (!normStr(title)) return { ok: false, code: 'needtitle' };
+      if (isFakeTitle(title)) return { ok: false, code: 'faketitle' };
+      if (!role) return { ok: false, code: 'needrole' };
+      if (!matchesStaffValue(currentStaffProfile, ['name', 'names'], name)) return { ok: false, code: 'namemismatch' };
+      if (!matchesStaffValue(currentStaffProfile, ['dept', 'depts', 'department', 'departments'], dept)) return { ok: false, code: 'deptmismatch' };
+      if (!matchesStaffValue(currentStaffProfile, ['title', 'titles'], title)) return { ok: false, code: 'titlemismatch' };
+      return { ok: true, code: 'ok' };
+    }
+
+    window.checkIdentityField = function() {
+      saveCurrentState();
+      const nameEl = document.getElementById('user-name');
+      const titleEl = document.getElementById('user-title');
+      const deptEl = document.getElementById('user-dept');
+      const box = document.getElementById('identity-status');
+      const r = validateStaffInput();
+      const show = (cls, msg) => { box.className = 'mt-4 px-4 py-3 rounded-lg text-sm font-semibold leading-relaxed ' + cls; box.innerText = msg; };
+      markIdentityField(nameEl, 'clear'); markIdentityField(titleEl, 'clear'); markIdentityField(deptEl, 'clear');
+      if (r.ok) {
+        markIdentityField(nameEl, 'ok'); markIdentityField(titleEl, 'ok'); markIdentityField(deptEl, 'ok');
+        show('bg-emerald-50 border border-emerald-200 text-emerald-800', '身分核對通過：Google 帳號 ' + currentAuthEmail + ' 已列入 staff 名冊，且您輸入的姓名、組別、職稱均相符。');
+      } else if (r.code === 'nologin') {
+        show('bg-amber-50 border border-amber-200 text-amber-800', '請先使用學校 Google 帳號登入；登入後才會讀取 Firestore staff/{email} 進行核對。');
+      } else if (r.code === 'baddomain') {
+        show('bg-red-50 border border-red-200 text-red-700', '目前登入帳號不是 @ntnu.edu.tw 或 @gapps.ntnu.edu.tw，無法填寫。');
+      } else if (r.code === 'nostaff') {
+        show('bg-red-50 border border-red-200 text-red-700', '此 Google 帳號未列入 Firestore staff/{email} 名冊，無法進入下一步。');
+      } else if (r.code === 'needname') {
+        markIdentityField(nameEl, 'bad'); show('bg-amber-50 border border-amber-200 text-amber-800', '請確認姓名：姓名欄位不能空白，且必須與目前登入帳號對應的 staff 名冊相符。');
+      } else if (r.code === 'needdept') {
+        markIdentityField(deptEl, 'bad'); show('bg-amber-50 border border-amber-200 text-amber-800', '請選擇所屬組別，且必須與 Firestore staff 名冊相符。');
+      } else if (r.code === 'needtitle') {
+        markIdentityField(titleEl, 'bad'); show('bg-red-50 border border-red-200 text-red-700', '請確認職稱：職稱欄位不能空白，請依資訊中心名冊填寫正式職稱。');
+      } else if (r.code === 'faketitle') {
+        markIdentityField(titleEl, 'bad'); show('bg-red-50 border border-red-200 text-red-700', '請確認職稱：職稱不能使用 aa、測試等無效文字，請填寫正式職稱。');
+      } else if (r.code === 'namemismatch') {
+        markIdentityField(nameEl, 'bad'); show('bg-red-50 border border-red-200 text-red-700', '姓名與目前 Google 帳號對應的 staff 名冊不符，請確認是否登入本人學校帳號。');
+      } else if (r.code === 'deptmismatch') {
+        markIdentityField(deptEl, 'bad'); show('bg-red-50 border border-red-200 text-red-700', '所屬組別與目前 Google 帳號對應的 staff 名冊不符。');
+      } else if (r.code === 'titlemismatch') {
+        markIdentityField(titleEl, 'bad'); show('bg-red-50 border border-red-200 text-red-700', '職稱與目前 Google 帳號對應的 staff 名冊不符，請填寫正式職稱。');
       }
       updateStepperLockUI();
     }
@@ -1754,7 +2035,8 @@
         const dept = document.getElementById('user-dept').value;
         const title = document.getElementById('user-title').value.trim();
         const role = document.getElementById('user-role').value;
-        return (name !== "" && dept !== "" && title !== "" && role !== "");
+        // 基本必填 + Google 學校帳號 + Firestore staff/{email} 名冊核對
+        return (name !== "" && dept !== "" && title !== "" && role !== "" && validateStaffInput().ok);
       }
       
       if (stepNum === 2) {
@@ -1846,7 +2128,16 @@
         for (let s = currentStep; s < step; s++) {
           if (!validateStep(s)) {
             let errorMsg = "請完整填寫必填欄位才可前進下一頁！";
-            if (s === 1) errorMsg = "請完整填寫第一階段『基本資料與主要職能』！";
+            if (s === 1) {
+              const idr = validateStaffInput();
+              if (idr.code === 'nologin') errorMsg = "請先使用學校 Google 帳號登入，再填寫基本資料。";
+              else if (idr.code === 'baddomain') errorMsg = "請使用 @ntnu.edu.tw 或 @gapps.ntnu.edu.tw 學校 Google 帳號登入。";
+              else if (idr.code === 'nostaff') errorMsg = "此 Google 帳號未列入 Firestore staff/{email} 名冊，無法進入下一步。";
+              else if (idr.code === 'needname') errorMsg = "請確認姓名：姓名欄位不能空白，且必須與 Firestore staff 名冊相符。";
+              else if (idr.code === 'needtitle') errorMsg = "請確認職稱：職稱欄位不能空白。";
+              else if (idr.code === 'faketitle') errorMsg = "請確認職稱：職稱不能使用 aa、測試等無效文字。";
+              else errorMsg = "請確認姓名、組別、職稱、主要職能皆已填寫，且與 Firestore staff 名冊相符。";
+            }
             if (s === 2) errorMsg = "請於第二階段至少勾選一個您『常用的 AI 工具』！";
             if (s === 3) errorMsg = "請於第三階段至少選擇一項您負責的『核心公務項目』！";
             if (s === 4) errorMsg = "第四階段『實務能力自評』尚有題目未完成 (共12題必填)！";
@@ -1951,6 +2242,148 @@
 
       modal.classList.remove('hidden');
       modal.classList.add('opacity-100');
+    }
+
+    // ===== 主管會報：彙整全體填答者資料動態產生簡報語境 =====
+    const DIM_LABELS = {
+      tech: 'AI技術應用',
+      solving: '業務問題解決',
+      integration: 'AI應用與場景整合',
+      governance: '數據識讀與治理',
+      collab: '團隊協作與領導力'
+    };
+
+    // 取得要分析的樣本：雲端 + 主管匯入（去重）；皆無時退回示範資料
+    function getAnalysisSubmissions() {
+      let list = [];
+      if (isCloudConnected && cloudSubmissions.length) list = list.concat(cloudSubmissions);
+      if (supervisorLocalSubmissions.length) list = list.concat(supervisorLocalSubmissions);
+      const seen = new Set();
+      list = list.filter(s => s && !seen.has(s.id) && seen.add(s.id));
+      if (list.length === 0) return { list: mockSubmissions, isDemo: true };
+      return { list, isDemo: false };
+    }
+
+    // 單筆 → 五維分數
+    function dimScoresForSub(sub) {
+      const m = { tech: [], solving: [], integration: [], governance: [] };
+      selfEvalQuestions.forEach(q => { m[q.dimension].push(Number(sub.selfEvalAnswers?.[q.id]) || 3); });
+      const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 3;
+      const collab = collabQuestions.map(c => Number(sub.collabAnswers?.[c.id]) || 3);
+      return {
+        tech: avg(m.tech), solving: avg(m.solving),
+        integration: avg(m.integration), governance: avg(m.governance),
+        collab: avg(collab)
+      };
+    }
+
+    // 全體彙總統計
+    function aggregateSubmissions(list) {
+      const dims = ['tech', 'solving', 'integration', 'governance', 'collab'];
+      const sums = { tech: 0, solving: 0, integration: 0, governance: 0, collab: 0 };
+      const overalls = [];
+      const toolCount = {}, taskCount = {}, roleCount = {};
+      list.forEach(sub => {
+        const d = dimScoresForSub(sub);
+        dims.forEach(k => sums[k] += d[k]);
+        overalls.push((d.tech + d.solving + d.integration + d.governance + d.collab) / 5);
+        (sub.selectedTools || []).forEach(t => toolCount[t] = (toolCount[t] || 0) + 1);
+        (sub.selectedCoreTasks || []).forEach(t => taskCount[t] = (taskCount[t] || 0) + 1);
+        if (sub.userRole) roleCount[sub.userRole] = (roleCount[sub.userRole] || 0) + 1;
+      });
+      const n = list.length;
+      const means = {};
+      dims.forEach(k => means[k] = sums[k] / n);
+      const overallAvg = overalls.reduce((a, b) => a + b, 0) / n;
+      const ranked = dims.map(k => ({ key: k, label: DIM_LABELS[k], val: means[k] }))
+                         .sort((a, b) => b.val - a.val);
+      const high = overalls.filter(v => v >= 4).length;
+      const mid = overalls.filter(v => v >= 3 && v < 4).length;
+      const low = overalls.filter(v => v < 3).length;
+      const topTools = Object.entries(toolCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      const topTasks = Object.entries(taskCount).sort((a, b) => b[1] - a[1]).slice(0, 3)
+                         .map(([id, c]) => ({ name: (coreTasks.find(t => t.id === id) || {}).name || id, count: c }));
+      return { n, means, overallAvg, ranked, high, mid, low, topTools, topTasks };
+    }
+
+    function renderSupervisorBriefing() {
+      const el1 = document.getElementById('slide-text-1');
+      const el2 = document.getElementById('slide-text-2');
+      const el3 = document.getElementById('slide-text-3');
+      if (!el1 || !el2 || !el3) return;
+
+      const { list, isDemo } = getAnalysisSubmissions();
+      const a = aggregateSubmissions(list);
+      const f = x => x.toFixed(1);
+      const pct = c => Math.round((c / a.n) * 100);
+      const strong = a.ranked[0];
+      const weak = a.ranked[a.ranked.length - 1];
+      const now = new Date().toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+      const header = isDemo
+        ? `（※ 目前尚無實際回收樣本，以下為 ${a.n} 筆示範資料試算；同仁上傳後將自動以真實數據更新）\n\n`
+        : `（本報告由 ${a.n} 份實際回收樣本即時統計生成 · 更新時間：${now}）\n\n`;
+
+      const toolsStr = a.topTools.length
+        ? a.topTools.map(([t, c]) => `${t}（${c} 人 / ${pct(c)}%）`).join('、')
+        : '尚無工具填答紀錄';
+      const dimLineFull = a.ranked.map(d => `${d.label} ${f(d.val)}`).join('、');
+      const target = Math.min(5, a.overallAvg + 0.5);
+      const weakTarget = Math.min(5, weak.val + 0.5);
+
+      // 投影片一、問卷調查
+      el1.innerText = header +
+`投影片一、問卷調查階段 (利用 AI 協助問卷設計與調查成果)
+
+1.1 如何生成問卷？
+結合資訊中心十大核心公務項目，運用 AI 協同產製對標「附件二：個人 AI 能力評估指標」之五維題組（12 題能力自評 ＋ 3 題協作領導），自動生成適用於行政與技術同仁的成熟度自評問卷。
+
+1.2 如何施測？
+採「線上自評 ＋ 去識別化上傳 ＋ 自訂 Firebase 雲端彙整」流程，同仁完成自評後即時匯入本主控台統計。本次共回收 ${a.n} 份有效樣本。
+
+1.3 調查結果（依實際回收 ${a.n} 份樣本統計）：
+- 全中心 AI 綜合成熟度平均：${f(a.overallAvg)} / 5 分。
+- 五維平均（高→低）：${dimLineFull}（滿分 5 分）。
+- 最突出維度：${strong.label}（${f(strong.val)} 分）；最待強化維度：${weak.label}（${f(weak.val)} 分）。
+- 同仁最常使用的 AI 工具：${toolsStr}。`;
+
+      // 投影片二、反思階段
+      const needList = a.ranked.slice().reverse().slice(0, 3)
+        .map((d, i) => `${i + 1}. ${d.label}（目前 ${f(d.val)} 分）`).join('\n');
+      el2.innerText = header +
+`投影片二、反思階段 (確立 AI 化方向與影響)
+
+2.1 中心目前最需強化的 AI 即戰力（依問卷弱項排序）：
+${needList}
+
+2.2 如何強化上述即戰力與補足缺口？
+- 針對最弱維度「${weak.label}」（${f(weak.val)} 分）優先開設專題工作坊，並建立對應的公用 Prompt 範本庫。
+- 由最強維度「${strong.label}」（${f(strong.val)} 分）表現突出之同仁擔任種子講師，進行跨組別內部擴散。
+- 聚焦同仁高頻業務（如：${a.topTasks.map(t => t.name).join('、') || '中心核心公務'}）設計實戰演練。
+
+2.3 導入 AI 後的具體正反面影響：
+- 正面：綜合成熟度達 4 分以上之高戰力同仁共 ${a.high} 位（${pct(a.high)}%），可帶動整體行政與運維效率提升。
+- 待強化：綜合低於 3 分者 ${a.low} 位（${pct(a.low)}%）需優先輔導；數據治理維度平均 ${f(a.means.governance)} 分，須落實「雙重人工覆核」與去識別化 SOP 以防資訊幻覺與機密外洩。`;
+
+      // 投影片三、行動階段
+      const nodeStr = a.topTasks.length
+        ? a.topTasks.map((t, i) => `- 關鍵導入節點 ${String.fromCharCode(65 + i)}：${t.name}（${t.count} 人勾選）`).join('\n')
+        : '- （尚無核心業務勾選資料，請待同仁填答後生成）';
+      el3.innerText = header +
+`投影片三、行動階段 (具體落實工作 AI 化)
+
+3.1 導入節點（依同仁實際勾選的核心業務熱度排序）：
+${nodeStr}
+
+3.2 導入步驟與時程：
+- 步驟一：建立公用 Prompt 範本庫（聚焦上述高頻業務）➔ 1.5 週
+- 步驟二：工具導入訓練，重點補強最弱維度「${weak.label}」➔ 2.0 週
+- 步驟三：去識別化篩檢稽核機制（現況治理 ${f(a.means.governance)} 分）➔ 1.0 週
+- 步驟四：日常公務工作流全面整合 ➔ 3.0 週
+
+3.3 預期成效：
+- 將全中心 AI 綜合成熟度由現況 ${f(a.overallAvg)} 分，於三個月內提升至 ${f(target)} 分。
+- 使最弱維度「${weak.label}」由 ${f(weak.val)} 分提升至 ${f(weakTarget)} 分以上，並將綜合 4 分以上之高戰力同仁比例由 ${pct(a.high)}% 進一步擴大。`;
     }
 
     window.switchSlideTab = function(tabNum) {
@@ -2216,7 +2649,13 @@
       }
 
       if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !validateStep(4) || !validateStep(5)) {
-        showToast("作答未完成", "請完整填寫並完成所有步驟的自評內容，方可將即戰力同步上傳！");
+        showToast("作答未完成", "請先完成 Google 登入與 Firestore staff 名冊核對，並完整填寫所有步驟。職稱不能空白或使用測試文字。");
+        return;
+      }
+
+      const freshStaffOk = await refreshStaffProfileForSubmit();
+      if (!freshStaffOk || !validateStaffInput().ok) {
+        showToast("身分核對失敗", "送出前重新讀取 Firestore staff 名冊後，發現登入帳號或姓名、組別、職稱不符，請確認後再上傳。");
         return;
       }
 
@@ -2241,7 +2680,8 @@
               selfEvalAnswers: appState.selfEvalAnswers,
               collabAnswers: appState.collabAnswers,
               createdAt: new Date().toISOString(),
-              uid: auth.currentUser.uid
+              uid: auth.currentUser.uid,
+              authEmail: currentAuthEmail
             };
 
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', auth.currentUser.uid);
@@ -2308,6 +2748,7 @@
         document.getElementById('user-title').value = "";
         document.getElementById('user-role').value = "";
 
+        checkIdentityField(); // 清除身分核對狀態與欄位標示
         saveCurrentState();
         switchEvalDimension('tech');
         goToStep(1);
@@ -2326,15 +2767,7 @@
       updateStepperLockUI();
 
       // Default preset configuration from user
-      const defaultFirebaseConfig = {
-        apiKey: "AIzaSyCYtjGnq_2caT0GTSm40A6qSA40JfLd8LM",
-        authDomain: "aihw1-c5063.firebaseapp.com",
-        projectId: "aihw1-c5063",
-        storageBucket: "aihw1-c5063.firebasestorage.app",
-        messagingSenderId: "1043040377392",
-        appId: "1:1043040377392:web:e376d664b8b9d8145a6bf5",
-        measurementId: "G-PHH67ZM6LV"
-      };
+      const defaultFirebaseConfig = DEFAULT_FIREBASE_CONFIG;
 
       const savedFirebaseConfigStr = localStorage.getItem('ntnu_custom_firebase_config_str');
       if (savedFirebaseConfigStr) {
@@ -2367,3 +2800,5 @@
   </script>
 </body>
 </html>
+
+
