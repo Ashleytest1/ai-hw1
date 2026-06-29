@@ -1,52 +1,51 @@
 rules_version = '2';
+
+// ============================================================
+//  臺師大資訊中心 AI 能力評估系統 — Firestore 安全規則
+//  原則：
+//   1. 上傳一律走 Cloud Function（Admin SDK 略過規則），前端「直接寫入」全部封鎖。
+//   2. 讀取：主管(admin claim) 可讀全部；一般同仁僅能讀自己那筆。
+//   3. 身分以 Firebase Auth token 為準（Google 學校帳號登入），前端無法偽造。
+// ============================================================
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() {
-      return request.auth != null && request.auth.token.email is string;
-    }
-    function isSchoolEmail() {
-      return signedIn()
-        && request.auth.token.email.matches('.*@(ntnu\.edu\.tw|gapps\.ntnu\.edu\.tw)$');
-    }
-    function staffPath() {
-      return /databases/$(database)/documents/staff/$(request.auth.token.email);
-    }
-    function staffData() {
-      return get(staffPath()).data;
-    }
-    function isStaff() {
-      return isSchoolEmail() && exists(staffPath());
-    }
+
+    // 是否為主管（由 Custom Claims admin:true 決定，於後端設定）
     function isAdmin() {
-      return isSchoolEmail()
-        && exists(/databases/$(database)/documents/admins/$(request.auth.token.email));
+      return request.auth != null && (
+        request.auth.token.admin == true
+        || request.auth.token.email in [
+          'whwang@gapps.ntnu.edu.tw',
+          'paili@gapps.ntnu.edu.tw',
+          'phchien@gapps.ntnu.edu.tw',
+          'kcwang@gapps.ntnu.edu.tw',
+          'mychou@gapps.ntnu.edu.tw',
+          'ashleynien@gapps.ntnu.edu.tw'
+        ]
+      );
     }
-    function titleMatchesStaff() {
-      return request.resource.data.userTitle == staffData().title
-        || ('titles' in staffData() && request.resource.data.userTitle in staffData().titles);
+
+    // 是否為學校網域帳號（實名）
+    function isSchoolUser() {
+      return request.auth != null
+        && request.auth.token.email is string
+        && request.auth.token.email.matches('.*@(gapps[.])?ntnu[.]edu[.]tw');
     }
-    function submissionMatchesStaff() {
-      return request.resource.data.authEmail == request.auth.token.email
-        && request.resource.data.userName == staffData().name
-        && request.resource.data.userDept == staffData().dept
-        && titleMatchesStaff();
-    }
-    match /artifacts/{appId}/public/data/submissions/{subId} {
-      allow create, update: if isStaff()
-                            && request.auth.uid == subId
-                            && submissionMatchesStaff();
-      allow read, delete:   if signedIn()
-                            && (request.auth.uid == subId || isAdmin());
-    }
-    match /staff/{email} {
-      allow get:  if signedIn() && (request.auth.token.email == email || isAdmin());
-      allow list: if isAdmin();
+
+    // 自評資料：artifacts/{appId}/public/data/submissions/{uid}
+    match /artifacts/{appId}/public/data/submissions/{docId} {
+
+      // 讀取：主管可讀全部；本人可讀自己那筆（不論實名或匿名，只要 UID 符合即可）
+      allow read: if isAdmin()
+        || (request.auth != null && resource.data.uid == request.auth.uid);
+
+      // 寫入：一律禁止前端直接寫入 → 強迫所有上傳經過 Cloud Function
       allow write: if false;
     }
-    match /admins/{email} {
-      allow get:  if signedIn() && (request.auth.token.email == email || isAdmin());
-      allow list: if isAdmin();
-      allow write: if false;
+
+    // 其餘路徑預設拒絕
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
