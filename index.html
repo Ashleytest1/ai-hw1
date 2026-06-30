@@ -1022,7 +1022,7 @@
     import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-    import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app-check.js";
+    import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken as getAppCheckToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app-check.js";
 
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'ntnu-ai-capability-dashboard';
     let isAnonymousMode = false;
@@ -1035,6 +1035,8 @@
       "phchien@gapps.ntnu.edu.tw",
       "kcwang@gapps.ntnu.edu.tw",
       "mychou@gapps.ntnu.edu.tw",
+    ]);
+    const DEVELOPER_EMAILS = new Set([
       "ashleynien@gapps.ntnu.edu.tw",
     ]);
     const CAMPUS_IP_PREFIX = "140.122.";                        // 校內網段
@@ -1049,6 +1051,7 @@
     // 本機 / 測試環境用：到 Console 取得 debug token 後填入，未填則留空字串。
     const APP_CHECK_DEBUG_TOKEN = "";
     let appCheckInitialized = false;
+    let appCheck = null;
 
     let customFirebaseApp = null;
     let db = null;
@@ -1061,6 +1064,8 @@
     let currentUser = null;
     let currentUserEmail = "";
     let isAdmin = false;          // 由 Firebase Custom Claims (admin:true) 決定
+    let isDeveloper = false;      // 系統開發者角色
+    let anonymousSignInPromise = null;
     let campusIpCache = null;     // 校內 IP 前端軟性檢查快取 (true/false/null)
 
     let cloudSubmissions = []; 
@@ -1237,8 +1242,8 @@
     // Switch between views
     window.switchMainView = function(viewName) {
       // 權限守門：只有管理者(admin)角色可進入主管分析主控台
-      if (viewName === 'supervisor' && !isAdmin) {
-        showToast("權限不足", "您目前的角色為「同仁」，無權檢視全中心分析資料。此功能僅開放給具管理者權限的主管。");
+      if (viewName === 'supervisor' && !isAdmin && !isDeveloper) {
+        showToast("權限不足", "您目前的角色為「同仁」，無權檢視全中心分析資料。此功能僅開放給具主管或管理者權限的人員。");
         return;
       }
       currentMainView = viewName;
@@ -1290,7 +1295,7 @@
         if (!appCheckInitialized && APP_CHECK_SITE_KEY && !APP_CHECK_SITE_KEY.startsWith("請貼上")) {
           try {
             if (APP_CHECK_DEBUG_TOKEN) self.FIREBASE_APPCHECK_DEBUG_TOKEN = APP_CHECK_DEBUG_TOKEN;
-            initializeAppCheck(customFirebaseApp, {
+            appCheck = initializeAppCheck(customFirebaseApp, {
               provider: new ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),
               isTokenAutoRefreshEnabled: true,
             });
@@ -1369,6 +1374,7 @@
           currentUser = null;
           currentUserEmail = "";
           isAdmin = false;
+          isDeveloper = false;
           applyRoleUI();
           showLoginGate();
           isCloudConnected = false;
@@ -1387,7 +1393,7 @@
 
     async function handleAuthStateChanged(user) {
       if (!user) {
-        currentUser = null; currentUserEmail = ""; isAdmin = false;
+        currentUser = null; currentUserEmail = ""; isAdmin = false; isDeveloper = false;
         isAnonymousMode = false;
         updateIdentityUI();
         applyRoleUI();
@@ -1410,16 +1416,19 @@
       currentUser = user;
       currentUserEmail = isAnonymousMode ? "anonymous" : email;
 
-      // 讀取 Custom Claims 判斷是否為主管(admin)
+      // 讀取 Custom Claims 判斷是否為主管(admin)與系統開發者(isDeveloper)
       try {
         if (!isAnonymousMode) {
           const tokenResult = await user.getIdTokenResult(true);
           isAdmin = tokenResult.claims.admin === true || SUPERVISOR_EMAILS.has(email);
+          isDeveloper = DEVELOPER_EMAILS.has(email);
         } else {
           isAdmin = false;
+          isDeveloper = false;
         }
       } catch (e) {
         isAdmin = false;
+        isDeveloper = false;
       }
 
       updateIdentityUI();
@@ -1429,8 +1438,8 @@
       isCloudConnected = true;
       updateConnectionUI(true);
 
-      // 僅主管需要即時讀取全中心資料（一般同仁讀取會被規則擋下）
-      if (isAdmin) {
+      // 僅主管與系統開發者需要即時讀取全中心資料（一般同仁讀取會被規則擋下）
+      if (isAdmin || isDeveloper) {
         setupRealtimeSync();
       } else {
         // 如果是一般同仁或匿名同仁，嘗試向 Firestore 載入已送出的報告（進行唯讀綁定）
@@ -1498,7 +1507,10 @@
         chip.classList.remove('hidden');
         chip.classList.add('flex');
         nameEl.innerText = (currentUser.displayName || currentUser.email || "");
-        if (isAdmin) {
+        if (isDeveloper) {
+          badge.innerText = "管理者";
+          badge.className = "text-[10px] px-1.5 py-0.5 rounded font-bold bg-violet-600 text-white shadow-sm";
+        } else if (isAdmin) {
           badge.innerText = "主管";
           badge.className = "text-[10px] px-1.5 py-0.5 rounded font-bold bg-ntnu-gold text-slate-950";
         } else {
@@ -1530,8 +1542,8 @@
     // 依角色控制「主管查看分析」按鈕與檢視權限
     function applyRoleUI() {
       const btn = document.getElementById('view-switch-btn');
-      if (btn) btn.style.display = isAdmin ? '' : 'none';
-      if (!isAdmin && currentMainView === 'supervisor') {
+      if (btn) btn.style.display = (isAdmin || isDeveloper) ? '' : 'none';
+      if (!isAdmin && !isDeveloper && currentMainView === 'supervisor') {
         switchMainView('assessment');
       }
     }
@@ -1651,6 +1663,7 @@
       currentUser = null;
       currentUserEmail = "";
       isAdmin = false;
+      isDeveloper = false;
       
       // Update state for anonymous - editable userName
       isAnonymousMode = true;
@@ -1681,13 +1694,12 @@
       setStorageMode('session', true);
       
       // Trigger Firebase anonymous sign in to enable database write access
-      if (auth) {
-        try {
-          await signInAnonymously(auth);
-          // Connection UI will be set to connected by handleAuthStateChanged
-        } catch (err) {
-          console.error("Anonymous authentication failed:", err);
-        }
+      try {
+        await ensureAnonymousAuth();
+        // Connection UI will be set to connected by handleAuthStateChanged
+      } catch (err) {
+        console.error("Anonymous authentication failed:", err);
+        showToast("匿名身分建立失敗", getAnonymousAuthErrorMessage(err));
       }
       
     };
@@ -2750,18 +2762,17 @@ ${topTasksText}
 
     window.syncToCloud = async function() {
       // 必須先以學校帳號登入或以匿名身份進入評估系統
-      if (!auth || !auth.currentUser) {
-        if (isAnonymousMode && auth) {
-          try {
-            await signInAnonymously(auth);
-          } catch (e) {
-            showToast("連線失敗", "匿名雲端同步需要伺服器連線，請檢查您的網路或 Firebase 匿名認證設定。");
-            return;
-          }
-        } else {
-          showToast("請先登入", "請先以學校 Google 帳號登入或以匿名身份進入評估系統再進行同步。");
+      if (isAnonymousMode) {
+        try {
+          await ensureAnonymousAuth();
+        } catch (err) {
+          console.error("Anonymous authentication failed:", err);
+          showToast("匿名身分建立失敗", getAnonymousAuthErrorMessage(err));
           return;
         }
+      } else if (!auth || !auth.currentUser) {
+        showToast("請先登入", "請先以學校 Google 帳號登入後再進行同步。");
+        return;
       }
       if (!functions) {
         showToast("雲端尚未就緒", "雲端服務尚未初始化，請稍候再試或重新整理頁面。");
@@ -2793,6 +2804,8 @@ ${topTasksText}
           syncBtn.disabled = true;
 
           try {
+            await ensureAppCheckReady();
+            await auth.currentUser.getIdToken();
             const maskedName = maskName(appState.userName || (currentUser && currentUser.displayName) || "");
             const payload = {
               rawName: appState.userName || "",
@@ -3140,8 +3153,60 @@ ${topTasksText}
       return str;
     }
 
+    function getAnonymousAuthErrorMessage(err) {
+      const messages = {
+        "auth/admin-restricted-operation": "Firebase 匿名登入尚未啟用，請聯絡系統管理者檢查 Authentication 的 Anonymous Provider。",
+        "auth/operation-not-allowed": "Firebase 匿名登入尚未啟用，請聯絡系統管理者檢查 Authentication 的 Anonymous Provider。",
+        "auth/network-request-failed": "無法連線至 Firebase 認證服務，請檢查網路後再試。",
+        "auth/too-many-requests": "匿名登入嘗試過於頻繁，請稍候再試。",
+        "auth/not-initialized": "Firebase 認證服務尚未初始化，請重新整理頁面後再試。",
+      };
+      return messages[err?.code] || `匿名身分建立失敗（${err?.code || "未知錯誤"}），請重新整理頁面後再試。`;
+    }
+
+    async function ensureAnonymousAuth() {
+      if (!auth) {
+        const err = new Error("Firebase Auth 尚未初始化");
+        err.code = "auth/not-initialized";
+        throw err;
+      }
+      if (auth.currentUser?.isAnonymous) {
+        await auth.currentUser.getIdToken();
+        return auth.currentUser;
+      }
+      if (!anonymousSignInPromise) {
+        anonymousSignInPromise = (async () => {
+          if (auth.currentUser) await signOut(auth);
+          const credential = await signInAnonymously(auth);
+          await credential.user.getIdToken(true);
+          return credential.user;
+        })().finally(() => {
+          anonymousSignInPromise = null;
+        });
+      }
+      return anonymousSignInPromise;
+    }
+
+    async function ensureAppCheckReady() {
+      if (!appCheckInitialized || !appCheck) {
+        const err = new Error("App Check 尚未初始化");
+        err.code = "app-check/not-initialized";
+        throw err;
+      }
+      await getAppCheckToken(appCheck, false);
+    }
+
     function getCloudSyncErrorMessage(err) {
+      if (err?.code?.startsWith('auth/')) {
+        return getAnonymousAuthErrorMessage(err);
+      }
+      if (err?.code?.startsWith('app-check/')) {
+        return "網站安全驗證失敗，請確認使用正式 HTTPS 網址、重新整理頁面後再試。";
+      }
       if (err?.code === 'functions/unauthenticated') {
+        if (isAnonymousMode) {
+          return "匿名身分或網站安全驗證已逾時，請重新整理頁面後再上傳，不需要改用 Google 登入。";
+        }
         return auth?.currentUser
           ? "網站安全驗證失敗或登入狀態已逾時，請重新整理頁面；若仍失敗，請重新登入。"
           : "請先以學校 Google 帳號登入後再上傳。";
@@ -3161,19 +3226,17 @@ ${topTasksText}
     window.syncToCloud = async function() {
       // 匿名模式取得 Firebase 匿名身分後即可直接上傳，不要求 Google 登入。
       // 若匿名認證仍在初始化，先靜默完成認證，不顯示 Google 登入提示。
-      if (!auth || !auth.currentUser) {
-        if (isAnonymousMode && auth) {
-          try {
-            await signInAnonymously(auth);
-          } catch (e) {
-            console.error("Anonymous authentication failed:", e);
-            showToast("連線失敗", "匿名雲端同步需要伺服器連線，請檢查您的網路或 Firebase 匿名認證設定。");
-            return;
-          }
-        } else {
-          showToast("請先登入", "請先以學校 Google 帳號登入後再進行同步。");
+      if (isAnonymousMode) {
+        try {
+          await ensureAnonymousAuth();
+        } catch (err) {
+          console.error("Anonymous authentication failed:", err);
+          showToast("匿名身分建立失敗", getAnonymousAuthErrorMessage(err));
           return;
         }
+      } else if (!auth || !auth.currentUser) {
+        showToast("請先登入", "請先以學校 Google 帳號登入後再進行同步。");
+        return;
       }
       if (!functions) {
         showToast("雲端尚未就緒", "雲端服務尚未初始化，請稍候再試或重新整理頁面。");
@@ -3202,6 +3265,8 @@ ${topTasksText}
           syncBtn.disabled = true;
 
           try {
+            await ensureAppCheckReady();
+            await auth.currentUser.getIdToken();
             const maskedName = maskName(appState.userName || (currentUser && currentUser.displayName) || "");
             const payload = {
               rawName: appState.userName || "",
