@@ -19,10 +19,14 @@ service cloud.firestore {
           'paili@gapps.ntnu.edu.tw',
           'phchien@gapps.ntnu.edu.tw',
           'kcwang@gapps.ntnu.edu.tw',
-          'mychou@gapps.ntnu.edu.tw',
-          'ashleynien@gapps.ntnu.edu.tw'
+          'mychou@gapps.ntnu.edu.tw'
         ]
       );
+    }
+
+    // 是否為系統開發者
+    function isDeveloper() {
+      return request.auth != null && request.auth.token.email == 'ashleynien@gapps.ntnu.edu.tw';
     }
 
     // 是否為學校網域帳號（實名）
@@ -35,8 +39,9 @@ service cloud.firestore {
     // 自評資料：artifacts/{appId}/public/data/submissions/{uid}
     match /artifacts/{appId}/public/data/submissions/{docId} {
 
-      // 讀取：主管可讀全部；本人可讀自己那筆（不論實名或匿名，只要 UID 符合即可）
+      // 讀取：主管與開發者可讀全部；本人可讀自己那筆（不論實名或匿名，只要 UID 符合即可）
       allow read: if isAdmin()
+        || isDeveloper()
         || (request.auth != null && resource.data.uid == request.auth.uid);
 
       // 寫入：一律禁止前端直接寫入 → 強迫所有上傳經過 Cloud Function
